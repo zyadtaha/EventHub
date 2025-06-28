@@ -1,0 +1,26 @@
+###
+GET http://localhost:8080/events
+###
+POST http://localhost:8080/events
+Content-Type: application/json
+
+{
+  "name": "Graduation party",
+  "dateTime": "2026-12-25T18:00:00",
+  "retailPrice": 2000,
+  "venueId": 1
+}
+
+###
+PUT http://localhost:8080/events/2
+Content-Type: application/json
+
+{
+  "name": "Graduation party",
+  "dateTime": "2025-12-25T18:00:00",
+  "retailPrice": 2000,
+  "venueId": 1
+}
+
+###
+DELETE http://localhost:8080/events/1
