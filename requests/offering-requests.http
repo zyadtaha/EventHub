@@ -1,0 +1,52 @@
+###
+GET http://localhost:8080/offerings
+###
+POST http://localhost:8080/offerings
+Content-Type: application/json
+
+{
+  "name": "Catering",
+  "price": 6000,
+  "type": "CATERING",
+  "options": [],
+  "offeringAreas": [],
+  "availabilitySlots": []
+}
+
+###
+PUT http://localhost:8080/offerings/2
+Content-Type: application/json
+
+{
+  "name": "cat",
+  "price": 9000,
+  "type": "PHOTOGRAPHY",
+  "options": [],
+  "offeringAreas": [],
+  "availabilitySlots": []
+}
+
+###
+DELETE http://localhost:8080/offerings/1
+
+###
+GET http://localhost:8080/offerings/2/options
+###
+POST http://localhost:8080/offerings/2/options
+Content-Type: application/json
+
+{
+  "name": "Camera",
+  "price": 600
+}
+###
+###
+GET http://localhost:8080/offerings/2/availability
+###
+POST http://localhost:8080/offerings/2/availability
+Content-Type: application/json
+
+{
+  "startTime": "2025-12-25T18:00:00",
+  "endTime": "2026-12-25T18:00:00"
+}
