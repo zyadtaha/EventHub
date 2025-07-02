@@ -1,0 +1,29 @@
+###
+GET http://localhost:8080/bookings
+
+###
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "eventId": 1 ,
+  "itemId": 1 ,
+  "item": "VENUE",
+  "bookingTime": "2024-06-10T12:00:00",
+  "totalPrice": 500
+}
+
+###
+PUT http://localhost:8080/bookings/1
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED",
+  "isCancelled": false,
+  "cancellationTime": null,
+  "totalPrice": 5000
+}
+
+###
+DELETE http://localhost:8080/bookings/1
+
