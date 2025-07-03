@@ -6,18 +6,25 @@ import com.eventsystem.dto.BookingUpdateDto;
 import com.eventsystem.model.Booking;
 import com.eventsystem.model.Event;
 import com.eventsystem.repository.EventRepository;
+import com.eventsystem.repository.OfferingRepository;
+import com.eventsystem.repository.VenueRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
 public class BookingMapper {
-    EventRepository eventRepository;
+    private final OfferingRepository offeringRepository;
+    private final EventRepository eventRepository;
+    private final VenueRepository venueRepository;
+    private final VenueMapper venueMapper;
+    private final OfferingMapper offeringMapper;
+
     public BookingDto toDto(Booking booking){
         return new BookingDto(
                 booking.getEvent().getId(),
-                booking.getItemId(),
-                booking.getItem(),
+                booking.getVenue() == null ? null : venueMapper.toDto(booking.getVenue()),
+                booking.getOffering() == null ? null : offeringMapper.toDto(booking.getOffering()),
                 booking.getBookingTime(),
                 booking.getTotalPrice(),
                 booking.getCancellationTime(),
@@ -31,8 +38,18 @@ public class BookingMapper {
                 .orElseThrow(() -> new IllegalArgumentException("Event not found with id: " + bookingCreationDto.getEventId()));
         Booking booking = new Booking();
         booking.setEvent(event);
-        booking.setItemId(bookingCreationDto.getItemId());
-        booking.setItem(bookingCreationDto.getItem());
+        if(bookingCreationDto.getVenueId() == null) {
+            booking.setVenue(null);
+        } else {
+            booking.setVenue(venueRepository.findById(bookingCreationDto.getVenueId())
+                    .orElseThrow(() -> new IllegalArgumentException("Venue not found with id: " + bookingCreationDto.getVenueId())));
+        }
+        if(bookingCreationDto.getOfferingId() == null) {
+            booking.setOffering(null);
+        } else {
+            booking.setOffering(offeringRepository.findById(bookingCreationDto.getOfferingId())
+                    .orElseThrow(() -> new IllegalArgumentException("Offering not found with id: " + bookingCreationDto.getOfferingId())));
+        }
         booking.setBookingTime(bookingCreationDto.getBookingTime());
         booking.setTotalPrice(bookingCreationDto.getTotalPrice());
         booking.setStatus(Booking.Status.PENDING);

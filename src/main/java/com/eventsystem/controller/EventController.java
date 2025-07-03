@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/events")
 public class EventController {
-    private EventService eventService;
+    private final EventService eventService;
 
     public EventController(EventService eventService) {
         this.eventService = eventService;

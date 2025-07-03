@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BookingDto {
     private Long eventId;
-    private Integer itemId;
-    private Booking.Item item;
+    private VenueDto venueDto;
+    private OfferingDto offeringDto;
     private LocalDateTime bookingTime;
     private Integer totalPrice;
     private LocalDateTime cancellationTime;

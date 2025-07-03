@@ -24,6 +24,9 @@ public class Offering {
     @Enumerated(EnumType.STRING)
     private OfferingType type;
 
+    @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List <Booking> bookings;
+
     @ElementCollection
     @CollectionTable(name = "offering_options", joinColumns = @JoinColumn(name = "offering_id"))
     private List<Option> options;
