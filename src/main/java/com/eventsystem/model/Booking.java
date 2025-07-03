@@ -2,12 +2,12 @@ package com.eventsystem.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @RequiredArgsConstructor
 public class Booking {
     @Id
@@ -17,18 +17,19 @@ public class Booking {
     @ManyToOne
     private Event event;
 
-    private Item item;
-    private Integer itemId;
+    @ManyToOne
+    @JoinColumn(name = "venue_id", nullable = true)
+    private Venue venue;
+
+    @ManyToOne
+    @JoinColumn(name = "offering_id", nullable = true)
+    private Offering offering;
+
     private LocalDateTime bookingTime;
     private LocalDateTime cancellationTime;
     private Integer totalPrice;
     private Status status;
     private boolean isCancelled;
-
-    public enum Item {
-        VENUE,
-        OFFERING
-    }
 
     public enum Status {
         CONFIRMED,

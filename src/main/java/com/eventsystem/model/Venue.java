@@ -1,7 +1,6 @@
 package com.eventsystem.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +21,9 @@ public class Venue {
     private Integer maxCapacity;
     private List<String> imageUrls;
     private Integer pricePerHour;
+
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List <Booking> bookings;
 
     public Venue(String name, String type, String location, Integer minCapacity, Integer maxCapacity, Integer pricePerHour) {
         this.name = name;

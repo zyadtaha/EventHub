@@ -10,6 +10,5 @@ import java.time.LocalDateTime;
 public class EventCreationDto {
     private String name;
     private LocalDateTime dateTime;
-    private Long venueId;
     private Integer retailPrice;
 }
