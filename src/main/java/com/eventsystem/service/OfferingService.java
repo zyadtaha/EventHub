@@ -29,24 +29,41 @@ public class OfferingService {
                 .collect(Collectors.toList());
     }
 
-    public OfferingDto createOffering(Offering offering) {
+    public List<OfferingDto> getAllOfferingsByProvider(String providerId) {
+        return offeringRepository
+                .findByProviderId(providerId)
+                .stream()
+                .map(offeringMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public OfferingDto createOffering(OfferingDto offeringDto, String providerId) {
+        Offering offering = offeringMapper.toEntity(offeringDto, providerId);
         Offering o = offeringRepository.save(offering);
         return offeringMapper.toDto(o);
     }
 
-    public OfferingDto updateOffering(Long id, Offering newOffering) {
-        Offering o = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
-        o.setName(newOffering.getName());
-        o.setPrice(newOffering.getPrice());
-        o.setType(newOffering.getType());
-        o.setOptions(newOffering.getOptions());
-        o.setOfferingAreas(newOffering.getOfferingAreas());
-        o.setAvailabilitySlots(newOffering.getAvailabilitySlots());
-        return offeringMapper.toDto(o);
+    public OfferingDto updateOffering(Long id, OfferingDto newOfferingDto, String providerId) {
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        if(!offering.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to update this offering");
+        }
+        offering.setName(newOfferingDto.getName());
+        offering.setPrice(newOfferingDto.getPrice());
+        offering.setType(newOfferingDto.getType());
+        offering.setOptions(newOfferingDto.getOptions());
+        offering.setOfferingAreas(newOfferingDto.getOfferingAreas());
+        offering.setAvailabilitySlots(newOfferingDto.getAvailabilitySlots());
+        offering.setProviderId(providerId);
+        return offeringMapper.toDto(offering);
     }
 
-    public void deleteOffering(Long id) {
-        offeringRepository.deleteById(id);
+    public void deleteOffering(Long id, String providerId) {
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        if(!offering.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to delete this offering");
+        }
+        offeringRepository.delete(offering);
     }
 
     public List<Offering.Option> getAllOptions(Long id) {
@@ -54,8 +71,11 @@ public class OfferingService {
         return offering.getOptions();
     }
 
-    public OfferingDto addOption(Long id, Offering.Option option) {
+    public OfferingDto addOption(Long id, Offering.Option option, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        if(!offering.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to add an option to this offering");
+        }
         offering.addOption(option);
         offeringRepository.save(offering);
         return offeringMapper.toDto(offering);
@@ -66,8 +86,11 @@ public class OfferingService {
         return offering.getAvailabilitySlots();
     }
 
-    public OfferingDto addAvailabilitySlot(Long id, LocalDateTime startTime, LocalDateTime endTime) {
+    public OfferingDto addAvailabilitySlot(Long id, LocalDateTime startTime, LocalDateTime endTime, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        if(!offering.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to add an availability slot to this offering");
+        }
         offering.addAvailabilitySlot(new Offering.AvailabilitySlot(startTime, endTime));
         offeringRepository.save(offering);
         return offeringMapper.toDto(offering);

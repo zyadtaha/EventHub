@@ -29,21 +29,36 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public EventDto createEvent(EventCreationDto eventDto) {
-        Event event = eventMapper.toEntity(eventDto);
+    public List<EventDto> getAllEventsByOrganizer(String organizerId) {
+        return eventRepository
+                .findByOrganizerId(organizerId)
+                .stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+
+    public EventDto createEvent(EventCreationDto eventDto, String organizerId) {
+        Event event = eventMapper.toEntity(eventDto, organizerId);
         eventRepository.save(event);
         return eventMapper.toDto(event);
     }
 
-    public EventDto updateEvent(Long id, EventUpdateDto eventDto) {
+    public EventDto updateEvent(Long id, EventUpdateDto eventDto, String organizerId) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
-        event = eventMapper.updateFromDtoToEntity(eventDto, event);
+        if (!event.getOrganizerId().equals(organizerId)) {
+            throw new IllegalArgumentException("You are not authorized to update this event");
+        }
+        event = eventMapper.updateFromDtoToEntity(eventDto, event, organizerId);
         eventRepository.save(event);
         return eventMapper.toDto(event);
     }
 
-    public void deleteEvent(Long id) {
+    public void deleteEvent(Long id, String organizerId) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        if (!event.getOrganizerId().equals(organizerId)) {
+            throw new IllegalArgumentException("You are not authorized to delete this event");
+        }
         eventRepository.delete(event);
     }
 }

@@ -35,18 +35,20 @@ public class EventMapper {
         );
     }
 
-    public Event toEntity(EventCreationDto eventCreationDto) {
+    public Event toEntity(EventCreationDto eventCreationDto, String organizerId) {
         Event event = new Event();
         event.setName(eventCreationDto.getName());
         event.setDateTime(eventCreationDto.getDateTime());
         event.setRetailPrice(eventCreationDto.getRetailPrice());
+        event.setOrganizerId(organizerId);
         return event;
     }
 
-    public Event updateFromDtoToEntity(EventUpdateDto eventUpdateDto, Event event){
+    public Event updateFromDtoToEntity(EventUpdateDto eventUpdateDto, Event event, String organizerId){
         event.setName(eventUpdateDto.getName());
         event.setDateTime(eventUpdateDto.getDateTime());
         event.setRetailPrice(eventUpdateDto.getRetailPrice());
+        event.setOrganizerId(organizerId);
         List<Booking> bookings = bookingRepository.findAllById(eventUpdateDto.getBookingIds());
         event.getBookings().clear();
         event.getBookings().addAll(bookings);

@@ -17,13 +17,14 @@ public class VenueMapper {
         );
     }
 
-    public Venue toEntity(VenueDto venueDto) {
+    public Venue toEntity(VenueDto venueDto, String providerId) {
         return new Venue(venueDto.getName(),
                 venueDto.getType(),
                 venueDto.getLocation(),
                 venueDto.getMinCapacity(),
                 venueDto.getMaxCapacity(),
-                venueDto.getPricePerHour()
+                venueDto.getPricePerHour(),
+                providerId
         );
     }
 }

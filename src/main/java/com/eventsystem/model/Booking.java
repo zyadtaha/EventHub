@@ -25,6 +25,12 @@ public class Booking {
     @JoinColumn(name = "offering_id", nullable = true)
     private Offering offering;
 
+    @Column(nullable = false, updatable = false)
+    private String organizerId;
+
+    @Column(nullable = false, updatable = false)
+    private String providerId;
+
     private LocalDateTime bookingTime;
     private LocalDateTime cancellationTime;
     private Integer totalPrice;
