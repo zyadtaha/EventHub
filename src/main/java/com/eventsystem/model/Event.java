@@ -19,6 +19,9 @@ public class Event {
     private String name;
     private LocalDateTime dateTime;
 
+    @Column(nullable = false, updatable = false)
+    private String organizerId;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
 

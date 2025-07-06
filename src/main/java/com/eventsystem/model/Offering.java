@@ -21,9 +21,14 @@ public class Offering {
     private String name;
     private Integer price;
 
+    @Column(nullable = false, updatable = false)
+    private String providerId;
+
     @Enumerated(EnumType.STRING)
     private OfferingType type;
 
+    // TODO: Should it be added to the constructor? (also check venue class)
+    // TODO: Should it be initialized with empty list?
     @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <Booking> bookings;
 
@@ -40,13 +45,14 @@ public class Offering {
     @CollectionTable(name = "offering_availability_slots", joinColumns = @JoinColumn(name = "offering_id"))
     private List<AvailabilitySlot> availabilitySlots;
 
-    public Offering(String name, Integer price, OfferingType type, List<Option> options, List<String> offeringAreas, List<AvailabilitySlot> availabilitySlots) {
+    public Offering(String name, Integer price, OfferingType type, List<Option> options, List<String> offeringAreas, List<AvailabilitySlot> availabilitySlots, String providerId) {
         this.name = name;
         this.price = price;
         this.type = type;
         this.options = options;
         this.offeringAreas = offeringAreas;
         this.availabilitySlots = availabilitySlots;
+        this.providerId = providerId;
     }
 
     public enum OfferingType {
@@ -76,6 +82,7 @@ public class Offering {
         }
     }
 
+    //TODO: check if the offering available at the event's time?
     public boolean isAvailableAt(LocalDateTime dateTime) {
         return availabilitySlots.stream()
                 .anyMatch(slot ->

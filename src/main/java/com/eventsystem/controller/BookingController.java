@@ -4,6 +4,8 @@ import com.eventsystem.dto.BookingCreationDto;
 import com.eventsystem.dto.BookingDto;
 import com.eventsystem.dto.BookingUpdateDto;
 import com.eventsystem.service.BookingService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,28 +19,45 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<BookingDto> getAllBookings() {
         return bookingService.getAllBookings();
     }
 
+    @GetMapping("/organizer/my-bookings")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public List<BookingDto> getAllBookingsByOrganizer(Authentication connectedUser) {
+        return bookingService.getAllBookingsByOrganizer(connectedUser);
+    }
+
+    @GetMapping("/provider/my-bookings")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    public List<BookingDto> getAllBookingsByProvider(Authentication connectedUser) {
+        return bookingService.getAllBookingsByProvider(connectedUser);
+    }
+
     @GetMapping("/{id}")
-    public BookingDto getBookingById(@PathVariable Long id) {
-        return bookingService.getBookingById(id);
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    public BookingDto getBookingById(@PathVariable Long id, Authentication connectedUser) {
+        return bookingService.getBookingById(id, connectedUser);
     }
 
     @PostMapping
-    public BookingDto createBooking(@RequestBody BookingCreationDto bookingCreationDto) {
-        return bookingService.createBooking(bookingCreationDto);
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public BookingDto createBooking(@RequestBody BookingCreationDto bookingCreationDto, Authentication connectedUser) {
+        return bookingService.createBooking(bookingCreationDto, connectedUser.getName());
     }
 
     @PutMapping("/{id}")
-    public BookingDto updateBooking(@PathVariable Long id, @RequestBody BookingUpdateDto bookingUpdateDto) {
-        return bookingService.updateBooking(id, bookingUpdateDto);
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    public BookingDto updateBooking(@PathVariable Long id, @RequestBody BookingUpdateDto bookingUpdateDto, Authentication connectedUser) {
+        return bookingService.updateBooking(id, bookingUpdateDto, connectedUser);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBooking(@PathVariable Long id) {
-        bookingService.deleteBooking(id);
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    public void deleteBooking(@PathVariable Long id, Authentication connectedUser) {
+        bookingService.deleteBooking(id, connectedUser);
     }
 }

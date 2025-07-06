@@ -17,14 +17,15 @@ public class OfferingMapper {
         );
     }
 
-    public Offering toEntity(OfferingDto offeringDto) {
+    public Offering toEntity(OfferingDto offeringDto, String providerId) {
         return new Offering(
                 offeringDto.getName(),
                 offeringDto.getPrice(),
                 offeringDto.getType(),
                 offeringDto.getOptions(),
                 offeringDto.getOfferingAreas(),
-                offeringDto.getAvailabilitySlots()
+                offeringDto.getAvailabilitySlots(),
+                providerId
         );
     }
 }

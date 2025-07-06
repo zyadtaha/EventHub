@@ -21,7 +21,6 @@ Content-Type: application/json
   "status": "CONFIRMED",
   "isCancelled": false,
   "cancellationTime": null,
-  "totalPrice": 5000
 }
 
 ###

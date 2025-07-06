@@ -27,26 +27,42 @@ public class VenueService {
                 .collect(Collectors.toList());
     }
 
-    public VenueDto createVenue(Venue venue) {
+    public List<VenueDto> getAllVenuesByProvider(String providerId) {
+        return venueRepository
+                .findByProviderId(providerId)
+                .stream()
+                .map(venueMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public VenueDto createVenue(VenueDto venueDto, String providerId) {
+        Venue venue = venueMapper.toEntity(venueDto, providerId);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
     }
 
-    public VenueDto updateVenue(Long id, Venue newVenue) {
+    public VenueDto updateVenue(Long id, VenueDto newVenueDto, String providerId) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
-        venue.setName(newVenue.getName());
-        venue.setLocation(newVenue.getLocation());
-        venue.setType(newVenue.getType());
-        venue.setImageUrls(newVenue.getImageUrls());
-        venue.setMinCapacity(newVenue.getMinCapacity());
-        venue.setMaxCapacity(newVenue.getMaxCapacity());
-        venue.setPricePerHour(newVenue.getPricePerHour());
+        if(!venue.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to update this venue");
+        }
+        venue.setName(newVenueDto.getName());
+        venue.setLocation(newVenueDto.getLocation());
+        venue.setType(newVenueDto.getType());
+        venue.setImageUrls(newVenueDto.getImageUrls());
+        venue.setMinCapacity(newVenueDto.getMinCapacity());
+        venue.setMaxCapacity(newVenueDto.getMaxCapacity());
+        venue.setPricePerHour(newVenueDto.getPricePerHour());
+        venue.setProviderId(providerId);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
     }
 
-    public void deleteVenue(Long id) {
+    public void deleteVenue(Long id, String providerId) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        if(!venue.getProviderId().equals(providerId)){
+            throw new IllegalArgumentException("You are not authorized to delete this venue");
+        }
         venueRepository.delete(venue);
     }
 }
