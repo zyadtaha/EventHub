@@ -23,7 +23,7 @@ public class Event {
     private String organizerId;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Booking> bookings = new ArrayList<>();
+    private List<ResourceBooking> resourceBookings = new ArrayList<>();
 
     private Integer retailPrice;
     private LocalDateTime creationTime = LocalDateTime.now();

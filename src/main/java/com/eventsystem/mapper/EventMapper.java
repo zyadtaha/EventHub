@@ -3,9 +3,9 @@ package com.eventsystem.mapper;
 import com.eventsystem.dto.EventCreationDto;
 import com.eventsystem.dto.EventDto;
 import com.eventsystem.dto.EventUpdateDto;
-import com.eventsystem.model.Booking;
+import com.eventsystem.model.ResourceBooking;
 import com.eventsystem.model.Event;
-import com.eventsystem.repository.BookingRepository;
+import com.eventsystem.repository.ResourceBookingRepository;
 import com.eventsystem.service.OfferingService;
 import com.eventsystem.service.VenueService;
 import lombok.AllArgsConstructor;
@@ -16,8 +16,8 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class EventMapper {
-    private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
+    private final ResourceBookingRepository resourceBookingRepository;
+    private final ResourceBookingMapper resourceBookingMapper;
     private final OfferingService offeringService;
     private final VenueService venueService;
 
@@ -25,8 +25,8 @@ public class EventMapper {
         return new EventDto(
                 event.getName(),
                 event.getDateTime(),
-                event.getBookings().stream()
-                        .map(bookingMapper::toDto)
+                event.getResourceBookings().stream()
+                        .map(resourceBookingMapper::toDto)
                         .toList(),
                 event.getRetailPrice(),
                 event.getCreationTime(),
@@ -49,9 +49,9 @@ public class EventMapper {
         event.setDateTime(eventUpdateDto.getDateTime());
         event.setRetailPrice(eventUpdateDto.getRetailPrice());
         event.setOrganizerId(organizerId);
-        List<Booking> bookings = bookingRepository.findAllById(eventUpdateDto.getBookingIds());
-        event.getBookings().clear();
-        event.getBookings().addAll(bookings);
+        List<ResourceBooking> resourceBookings = resourceBookingRepository.findAllById(eventUpdateDto.getBookingIds());
+        event.getResourceBookings().clear();
+        event.getResourceBookings().addAll(resourceBookings);
         return event;
     }
 }
