@@ -9,11 +9,13 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Entity
 @RequiredArgsConstructor
-public class Booking {
+public class ResourceBooking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // TODO: Do you really need event, offering, venue ? you already have their IDs,
+    // TODO: Think of having a super class called bookable ?
     @ManyToOne
     private Event event;
 

@@ -26,7 +26,7 @@ public class Venue {
     private String providerId;
 
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List <Booking> bookings;
+    private List <ResourceBooking> resourceBookings;
 
     // TODO: make the venue type compatible with the event
     public Venue(String name, String type, String location, Integer minCapacity, Integer maxCapacity, Integer pricePerHour, String providerId) {

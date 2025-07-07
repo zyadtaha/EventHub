@@ -30,7 +30,7 @@ public class Offering {
     // TODO: Should it be added to the constructor? (also check venue class)
     // TODO: Should it be initialized with empty list?
     @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List <Booking> bookings;
+    private List <ResourceBooking> resourceBookings;
 
     @ElementCollection
     @CollectionTable(name = "offering_options", joinColumns = @JoinColumn(name = "offering_id"))

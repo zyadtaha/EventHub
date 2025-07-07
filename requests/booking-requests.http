@@ -1,8 +1,8 @@
 ###
-GET http://localhost:8080/bookings
-
+GET http://localhost:8080/resourceBookings
+// TODO: deprecate these files, add postman collections instead
 ###
-POST http://localhost:8080/bookings
+POST http://localhost:8080/resourceBookings
 Content-Type: application/json
 
 {
@@ -14,7 +14,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:8080/bookings/1
+PUT http://localhost:8080/resourceBookings/1
 Content-Type: application/json
 
 {
@@ -24,5 +24,5 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:8080/bookings/1
+DELETE http://localhost:8080/resourceBookings/1
 

@@ -1,5 +1,6 @@
 package com.eventsystem.dto;
 
+import com.eventsystem.dto.resourcebooking.ResourceBookingDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public class EventDto {
     private String name;
     private LocalDateTime dateTime;
-    private List<BookingDto> bookingDtos;
+    private List<ResourceBookingDto> resourceBookingDtos;
     private Integer retailPrice;
     private LocalDateTime creationTime;
     private boolean canCancelWithoutPenalty;

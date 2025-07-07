@@ -1,4 +1,4 @@
-package com.eventsystem.dto;
+package com.eventsystem.dto.resourcebooking;
 
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookingCreationDto {
+public class ResourceBookingCreationDto {
     private Long eventId;
     @Column(nullable = true)
     private Long venueId;
