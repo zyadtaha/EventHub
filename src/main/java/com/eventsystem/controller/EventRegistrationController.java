@@ -49,10 +49,7 @@ public class EventRegistrationController {
     @PostMapping
     @PreAuthorize("hasRole('ATTENDEE')")
     public RegistrationDto createEventRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) {
-        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
-        Jwt jwt = jwtToken.getToken();
-        String preferredUsername = jwt.getClaimAsString("preferred_username");
-        return registrationService.createEventRegistration(registrationCreationDto, preferredUsername, connectedUser.getName());
+        return registrationService.createEventRegistration(registrationCreationDto, connectedUser);
     }
 
     @PutMapping

@@ -17,7 +17,7 @@ public class OfferingMapper {
         );
     }
 
-    public Offering toEntity(OfferingDto offeringDto, String providerId) {
+    public Offering toEntity(OfferingDto offeringDto, String providerId, String providerEmail) {
         return new Offering(
                 offeringDto.getName(),
                 offeringDto.getPrice(),
@@ -25,7 +25,8 @@ public class OfferingMapper {
                 offeringDto.getOptions(),
                 offeringDto.getOfferingAreas(),
                 offeringDto.getAvailabilitySlots(),
-                providerId
+                providerId,
+                providerEmail
         );
     }
 }

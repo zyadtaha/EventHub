@@ -46,7 +46,7 @@ public class ResourceBookingController {
     @PostMapping
     @PreAuthorize("hasRole('ORGANIZER')")
     public ResourceBookingDto createBooking(@RequestBody ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) {
-        return resourceBookingService.createBooking(resourceBookingCreationDto, connectedUser.getName());
+        return resourceBookingService.createBooking(resourceBookingCreationDto, connectedUser);
     }
 
     @PutMapping("/{id}")

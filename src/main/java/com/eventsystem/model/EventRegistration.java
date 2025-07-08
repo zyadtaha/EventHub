@@ -20,8 +20,8 @@ public class EventRegistration {
 
     @Column(nullable = false, updatable = false)
     private String attendeeId;
-
     private String attendeeName;
+    private String attendeeEmail;
 
     @Column(nullable = false, updatable = false)
     private String organizerId;

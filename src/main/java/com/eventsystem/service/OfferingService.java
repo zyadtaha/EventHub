@@ -4,6 +4,9 @@ import com.eventsystem.dto.OfferingDto;
 import com.eventsystem.mapper.OfferingMapper;
 import com.eventsystem.model.Offering;
 import com.eventsystem.repository.OfferingRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,8 +40,12 @@ public class OfferingService {
                 .collect(Collectors.toList());
     }
 
-    public OfferingDto createOffering(OfferingDto offeringDto, String providerId) {
-        Offering offering = offeringMapper.toEntity(offeringDto, providerId);
+    public OfferingDto createOffering(OfferingDto offeringDto, Authentication connectedUser) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
+        Jwt jwt = jwtToken.getToken();
+        String providerEmail = jwt.getClaimAsString("email");
+        String providerId = connectedUser.getName();
+        Offering offering = offeringMapper.toEntity(offeringDto, providerId, providerEmail);
         Offering o = offeringRepository.save(offering);
         return offeringMapper.toDto(o);
     }

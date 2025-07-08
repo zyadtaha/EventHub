@@ -25,11 +25,20 @@ public class Venue {
     @Column(nullable = false, updatable = false)
     private String providerId;
 
+    private String providerEmail;
+
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <ResourceBooking> resourceBookings;
 
     // TODO: make the venue type compatible with the event
-    public Venue(String name, String type, String location, Integer minCapacity, Integer maxCapacity, Integer pricePerHour, String providerId) {
+    public Venue(String name,
+                 String type,
+                 String location,
+                 Integer minCapacity,
+                 Integer maxCapacity,
+                 Integer pricePerHour,
+                 String providerId,
+                 String providerEmail) {
         this.name = name;
         this.type = type;
         this.location = location;
@@ -37,5 +46,6 @@ public class Venue {
         this.maxCapacity = maxCapacity;
         this.pricePerHour = pricePerHour;
         this.providerId = providerId;
+        this.providerEmail = providerEmail;
     }
 }

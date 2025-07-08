@@ -34,7 +34,7 @@ public class VenueController {
 
     @PostMapping()
     public VenueDto createVenue(@RequestBody VenueDto venueDto, Authentication connectedUser){
-        return venueService.createVenue(venueDto, connectedUser.getName());
+        return venueService.createVenue(venueDto, connectedUser);
     }
 
     @PutMapping("/{id}")
