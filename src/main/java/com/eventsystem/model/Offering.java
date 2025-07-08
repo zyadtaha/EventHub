@@ -20,6 +20,7 @@ public class Offering {
 
     private String name;
     private Integer price;
+    private String providerEmail;
 
     @Column(nullable = false, updatable = false)
     private String providerId;
@@ -45,7 +46,14 @@ public class Offering {
     @CollectionTable(name = "offering_availability_slots", joinColumns = @JoinColumn(name = "offering_id"))
     private List<AvailabilitySlot> availabilitySlots;
 
-    public Offering(String name, Integer price, OfferingType type, List<Option> options, List<String> offeringAreas, List<AvailabilitySlot> availabilitySlots, String providerId) {
+    public Offering(String name,
+                    Integer price,
+                    OfferingType type,
+                    List<Option> options,
+                    List<String> offeringAreas,
+                    List<AvailabilitySlot> availabilitySlots,
+                    String providerId,
+                    String providerEmail) {
         this.name = name;
         this.price = price;
         this.type = type;
@@ -53,6 +61,7 @@ public class Offering {
         this.offeringAreas = offeringAreas;
         this.availabilitySlots = availabilitySlots;
         this.providerId = providerId;
+        this.providerEmail = providerEmail;
     }
 
     public enum OfferingType {

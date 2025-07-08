@@ -6,7 +6,10 @@ import com.eventsystem.dto.resourcebooking.ResourceBookingUpdateDto;
 import com.eventsystem.mapper.ResourceBookingMapper;
 import com.eventsystem.model.ResourceBooking;
 import com.eventsystem.repository.ResourceBookingRepository;
+import com.eventsystem.utils.EmailService;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +19,12 @@ import java.util.stream.Collectors;
 public class ResourceBookingService {
     ResourceBookingRepository resourceBookingRepository;
     ResourceBookingMapper resourceBookingMapper;
+    EmailService emailService;
 
-    public ResourceBookingService(ResourceBookingRepository resourceBookingRepository, ResourceBookingMapper resourceBookingMapper) {
+    public ResourceBookingService(ResourceBookingRepository resourceBookingRepository, ResourceBookingMapper resourceBookingMapper, EmailService emailService) {
         this.resourceBookingRepository = resourceBookingRepository;
         this.resourceBookingMapper = resourceBookingMapper;
+        this.emailService = emailService;
     }
 
     public List<ResourceBookingDto> getAllBookings() {
@@ -58,12 +63,17 @@ public class ResourceBookingService {
         }
     }
 
-    public ResourceBookingDto createBooking(ResourceBookingCreationDto resourceBookingCreationDto, String organizerId) {
+    public ResourceBookingDto createBooking(ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) {
+        String organizerId = connectedUser.getName();
         ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto, organizerId);
         if(!resourceBooking.getEvent().getOrganizerId().equals(organizerId)){
             throw new IllegalArgumentException("You are not authorized to create a booking to this event");
         }
         resourceBookingRepository.save(resourceBooking);
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
+        Jwt jwt = jwtToken.getToken();
+        String organizerEmail = jwt.getClaimAsString("email");
+        emailService.sendBookingConfirmation(resourceBooking, organizerEmail);
         return resourceBookingMapper.toDto(resourceBooking);
     }
 
@@ -89,6 +99,10 @@ public class ResourceBookingService {
                 connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_OFFERING_PROVIDER") && resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(connectedUser.getName()))
         ) {
             resourceBookingRepository.delete(resourceBooking);
+            JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
+            Jwt jwt = jwtToken.getToken();
+            String organizerEmail = jwt.getClaimAsString("email");
+            emailService.sendBookingCancellation(resourceBooking, organizerEmail);
         } else {
             throw new IllegalArgumentException("You are not authorized to delete this booking");
         }

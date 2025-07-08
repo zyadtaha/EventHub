@@ -34,7 +34,7 @@ public class OfferingController {
 
     @PostMapping
     public OfferingDto createOffering(@RequestBody OfferingDto offeringDto, Authentication connectedUser) {
-        return offeringService.createOffering(offeringDto, connectedUser.getName());
+        return offeringService.createOffering(offeringDto, connectedUser);
     }
 
     @PutMapping("/{id}")

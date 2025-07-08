@@ -8,6 +8,10 @@ import com.eventsystem.model.Event;
 import com.eventsystem.model.EventRegistration;
 import com.eventsystem.repository.EventRegistrationRepository;
 import com.eventsystem.repository.EventRepository;
+import com.eventsystem.utils.EmailService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +22,13 @@ public class EventRegistrationService {
     private final EventRegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
     private final RegistrationMapper registrationMapper;
+    private final EmailService emailService;
 
-    public EventRegistrationService(EventRegistrationRepository registrationRepository, EventRepository eventRepository, RegistrationMapper registrationMapper) {
+    public EventRegistrationService(EventRegistrationRepository registrationRepository, EventRepository eventRepository, RegistrationMapper registrationMapper, EmailService emailService) {
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
         this.registrationMapper = registrationMapper;
+        this.emailService = emailService;
     }
 
     public List<RegistrationDto> getAllRegistrations() {
@@ -60,9 +66,19 @@ public class EventRegistrationService {
         return registrationMapper.toDto(registration);
     }
 
-    public RegistrationDto createEventRegistration(RegistrationCreationDto registrationCreationDto, String attendeeName, String attendeeId) {
-        EventRegistration er = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeId);
+    public RegistrationDto createEventRegistration(RegistrationCreationDto registrationCreationDto, Authentication connectedUser) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
+        Jwt jwt = jwtToken.getToken();
+        String attendeeName = jwt.getClaimAsString("preferred_username");
+        String attendeeEmail = jwt.getClaimAsString("email");
+        String attendeeId = connectedUser.getName();
+
+        EventRegistration er = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeId, attendeeEmail);
         registrationRepository.save(er);
+
+        Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        emailService.sendAttendeeInvitation(attendeeEmail, event);
+
         return registrationMapper.toDto(er);
     }
 
@@ -73,6 +89,10 @@ public class EventRegistrationService {
         }
         registration = registrationMapper.updateEntityFromDto(registrationUpdateDto, registration);
         registrationRepository.save(registration);
+
+        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        emailService.sendAttendeeUpdate(registration.getAttendeeEmail(), event);
+
         return registrationMapper.toDto(registration);
     }
 
@@ -84,5 +104,8 @@ public class EventRegistrationService {
         registration.setCancelled(true);
         registration.setCancellationTime(java.time.LocalDateTime.now());
         registrationRepository.save(registration);
+
+        Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        emailService.sendAttendeeCancellation(registration.getAttendeeEmail(), event);
     }
 }

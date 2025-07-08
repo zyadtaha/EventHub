@@ -1,9 +1,14 @@
 package com.eventsystem.service;
 
+import com.eventsystem.dto.OfferingDto;
 import com.eventsystem.dto.VenueDto;
 import com.eventsystem.mapper.VenueMapper;
+import com.eventsystem.model.Offering;
 import com.eventsystem.model.Venue;
 import com.eventsystem.repository.VenueRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,8 +40,12 @@ public class VenueService {
                 .collect(Collectors.toList());
     }
 
-    public VenueDto createVenue(VenueDto venueDto, String providerId) {
-        Venue venue = venueMapper.toEntity(venueDto, providerId);
+    public VenueDto createVenue(VenueDto venueDto, Authentication connectedUser) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
+        Jwt jwt = jwtToken.getToken();
+        String providerEmail = jwt.getClaimAsString("email");
+        String providerId = connectedUser.getName();
+        Venue venue = venueMapper.toEntity(venueDto, providerId, providerEmail);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
     }
