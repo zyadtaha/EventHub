@@ -57,7 +57,7 @@ public class ResourceBookingController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
-    public void deleteBooking(@PathVariable Long id, Authentication connectedUser) {
-        resourceBookingService.deleteBooking(id, connectedUser);
+    public void cancelBooking(@PathVariable Long id, Authentication connectedUser) {
+        resourceBookingService.cancelBooking(id, connectedUser);
     }
 }

@@ -91,20 +91,23 @@ public class ResourceBookingService {
         }
     }
 
-    // TODO: should it be cancelBooking instead of deleteBooking?
-    public void deleteBooking(Long id, Authentication connectedUser) {
+    public void cancelBooking(Long id, Authentication connectedUser) {
         ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
         if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER") && resourceBooking.getOrganizerId().equals(connectedUser.getName())) ||
                 connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_VENUE_PROVIDER") && resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(connectedUser.getName())) ||
                 connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_OFFERING_PROVIDER") && resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(connectedUser.getName()))
         ) {
-            resourceBookingRepository.delete(resourceBooking);
+            resourceBooking.setCancelled(true);
+            resourceBooking.setCancellationTime(java.time.LocalDateTime.now());
+            resourceBooking.setStatus(ResourceBooking.Status.CANCELLED);
+            resourceBookingRepository.save(resourceBooking);
+
             JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
             Jwt jwt = jwtToken.getToken();
             String organizerEmail = jwt.getClaimAsString("email");
             emailService.sendBookingCancellation(resourceBooking, organizerEmail);
         } else {
-            throw new IllegalArgumentException("You are not authorized to delete this booking");
+            throw new IllegalArgumentException("You are not authorized to cancel this booking");
         }
     }
 }
