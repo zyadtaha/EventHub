@@ -14,7 +14,11 @@ public class StripeService {
     @Value("${stripe.api.key}")
     private String stripeApiKey;
 
-    public String createPaymentLink(BigDecimal amount, String currency, String productName, Long registrationId) throws StripeException {
+    public String createPaymentLink(BigDecimal amount,
+                                    String currency,
+                                    String productName,
+                                    Long reservationId,
+                                    boolean isEventRegistration) throws StripeException {
         Stripe.apiKey = stripeApiKey;
 
         BigDecimal amountInCents = amount
@@ -41,7 +45,8 @@ public class StripeService {
                                 .setQuantity(1L)
                                 .build()
                 )
-                .putMetadata("registration_id", registrationId.toString())
+                .putMetadata("reservation_id", reservationId.toString())
+                .putMetadata("is_registration", String.valueOf(isEventRegistration))
                 .build();
 
         Session session = Session.create(params);

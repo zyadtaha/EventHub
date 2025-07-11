@@ -27,15 +27,13 @@ public class EventRegistrationService {
     private final RegistrationMapper registrationMapper;
     private final EmailService emailService;
     private final StripeService stripeService;
-    private final EventService eventService;
 
-    public EventRegistrationService(EventRegistrationRepository registrationRepository, EventRepository eventRepository, RegistrationMapper registrationMapper, EmailService emailService, StripeService stripeService, EventService eventService) {
+    public EventRegistrationService(EventRegistrationRepository registrationRepository, EventRepository eventRepository, RegistrationMapper registrationMapper, EmailService emailService, StripeService stripeService) {
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
         this.registrationMapper = registrationMapper;
         this.emailService = emailService;
         this.stripeService = stripeService;
-        this.eventService = eventService;
     }
 
     public List<RegistrationDto> getAllRegistrations() {
@@ -89,10 +87,11 @@ public class EventRegistrationService {
                 BigDecimal.valueOf(event.getRetailPrice()),
                 "USD",
                 "Registration for: " + event.getName(),
-                registration.getId()
+                registration.getId(),
+                true
         );
 
-        emailService.sendPaymentRequest(attendeeEmail, event, paymentUrl);
+        emailService.sendRegistrationPaymentRequest(attendeeEmail, event, paymentUrl);
         return registrationMapper.toDto(registration);
     }
 

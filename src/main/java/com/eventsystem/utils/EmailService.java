@@ -84,7 +84,7 @@ public class EmailService {
         sendEmail(attendeeEmail, subject, body);
     }
 
-    public void sendPaymentRequest(String attendeeEmail, Event event, String paymentUrl) {
+    public void sendRegistrationPaymentRequest(String attendeeEmail, Event event, String paymentUrl) {
         String subject = "Payment Request for Event Registration";
         String body = String.format(
                 "Thank you for registering for %s.\nPlease complete your payment using the following link: %s\n\n",
@@ -92,5 +92,15 @@ public class EmailService {
                 paymentUrl
         );
         sendEmail(attendeeEmail, subject, body);
+    }
+
+    public void sendBookingPaymentRequest(String organizerEmail, String name, String paymentUrl) {
+        String subject = "Payment Request for Booking";
+        String body = String.format(
+                "Thank you for booking for %s.\nPlease complete your payment using the following link: %s\n\n",
+                name,
+                paymentUrl
+        );
+        sendEmail(organizerEmail, subject, body);
     }
 }
