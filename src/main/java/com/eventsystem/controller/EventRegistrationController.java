@@ -4,10 +4,9 @@ import com.eventsystem.dto.eventregistration.RegistrationCreationDto;
 import com.eventsystem.dto.eventregistration.RegistrationDto;
 import com.eventsystem.dto.eventregistration.RegistrationUpdateDto;
 import com.eventsystem.service.EventRegistrationService;
+import com.stripe.exception.StripeException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,7 +47,7 @@ public class EventRegistrationController {
 
     @PostMapping
     @PreAuthorize("hasRole('ATTENDEE')")
-    public RegistrationDto createEventRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) {
+    public RegistrationDto createEventRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
         return registrationService.createEventRegistration(registrationCreationDto, connectedUser);
     }
 

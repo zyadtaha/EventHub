@@ -4,6 +4,7 @@ import com.eventsystem.dto.resourcebooking.ResourceBookingCreationDto;
 import com.eventsystem.dto.resourcebooking.ResourceBookingDto;
 import com.eventsystem.dto.resourcebooking.ResourceBookingUpdateDto;
 import com.eventsystem.service.ResourceBookingService;
+import com.stripe.exception.StripeException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +46,7 @@ public class ResourceBookingController {
 
     @PostMapping
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResourceBookingDto createBooking(@RequestBody ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) {
+    public ResourceBookingDto createBooking(@RequestBody ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) throws StripeException {
         return resourceBookingService.createBooking(resourceBookingCreationDto, connectedUser);
     }
 
@@ -57,7 +58,7 @@ public class ResourceBookingController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
-    public void deleteBooking(@PathVariable Long id, Authentication connectedUser) {
-        resourceBookingService.deleteBooking(id, connectedUser);
+    public void cancelBooking(@PathVariable Long id, Authentication connectedUser) {
+        resourceBookingService.cancelBooking(id, connectedUser);
     }
 }

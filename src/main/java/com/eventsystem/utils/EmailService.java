@@ -83,4 +83,24 @@ public class EmailService {
         String body = String.format("Registration for %s has been cancelled.", event.getName());
         sendEmail(attendeeEmail, subject, body);
     }
+
+    public void sendRegistrationPaymentRequest(String attendeeEmail, Event event, String paymentUrl) {
+        String subject = "Payment Request for Event Registration";
+        String body = String.format(
+                "Thank you for registering for %s.\nPlease complete your payment using the following link: %s\n\n",
+                event.getName(),
+                paymentUrl
+        );
+        sendEmail(attendeeEmail, subject, body);
+    }
+
+    public void sendBookingPaymentRequest(String organizerEmail, String name, String paymentUrl) {
+        String subject = "Payment Request for Booking";
+        String body = String.format(
+                "Thank you for booking for %s.\nPlease complete your payment using the following link: %s\n\n",
+                name,
+                paymentUrl
+        );
+        sendEmail(organizerEmail, subject, body);
+    }
 }
