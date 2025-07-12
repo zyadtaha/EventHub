@@ -1,6 +1,6 @@
 services:
-  db:
-    container_name: postgres-ems
+  eventhub-db:
+    container_name: eventhub-postgres
     image: postgres:latest
     environment:
       POSTGRES_DB: eventsystem
@@ -8,37 +8,63 @@ services:
       POSTGRES_PASSWORD: password
       PGDATA: /data/postgres
     volumes:
-      - db:/data/postgres
+      - eventhub_pg_data:/data/postgres
     ports:
       - "5332:5432"
     networks:
-      - db
+      - eventhub-network
     restart: unless-stopped
-  keycloak:
-    container_name: keycloak-ems
+
+  eventhub-auth:
+    container_name: eventhub-keycloak
     image: quay.io/keycloak/keycloak:latest
     environment:
       DB_VENDOR: POSTGRES
-      DB_ADDR: db
+      DB_ADDR: eventhub-db
       DB_DATABASE: eventsystem
       DB_USER: root
       DB_PASSWORD: password
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
-      - keycloak:/opt/keycloak/data
+      - eventhub_kc_data:/opt/keycloak/data
     ports:
       - "9090:8080"
     depends_on:
-      - db
+      - eventhub-db
     networks:
-      - db
+      - eventhub-network
     restart: unless-stopped
     command:
       - "start-dev"
+
+  eventhub-app:
+    container_name: eventhub-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://eventhub-db:5432/eventsystem
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://eventhub-auth:8080/realms/EventHub
+      SPRING_MAIL_USERNAME: ${EMAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${EMAIL_PASSWORD}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eventhub-db
+      - eventhub-auth
+    networks:
+      - eventhub-network
+    restart: unless-stopped
+
 networks:
-  db:
+  eventhub-network:
     driver: bridge
 volumes:
-  db:
-  keycloak:
+  eventhub_pg_data:
+    name: eventhub-postgres-data
+  eventhub_kc_data:
+    name: eventhub-keycloak-data

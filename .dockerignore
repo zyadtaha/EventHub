@@ -1,0 +1,42 @@
+# Maven build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+
+# VS Code project files
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Version control
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# Node modules (if any frontend is present)
+node_modules/
+.npm/
+
+# Maven wrapper jar (optional)
+.mvn/wrapper/maven-wrapper.jar
+
+# Documentation
+*.md
