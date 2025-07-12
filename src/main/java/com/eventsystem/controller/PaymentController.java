@@ -4,6 +4,8 @@ import com.eventsystem.service.ResourceBookingService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.eventsystem.service.EventRegistrationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/payments")
+@Tag(name = "Payment", description = "Payment management for event registrations and resource bookings")
 public class PaymentController {
     private final EventRegistrationService registrationService;
     private final ResourceBookingService bookingService;
@@ -22,6 +25,7 @@ public class PaymentController {
     }
 
     @GetMapping("/success")
+    @Operation(summary = "Confirm payment for event registration or resource booking")
     public String confirmPayment(@RequestParam String session_id, Authentication connectedUser) throws StripeException {
         Session session = Session.retrieve(session_id);
         String reservationId = session.getMetadata().get("reservation_id");
@@ -35,6 +39,7 @@ public class PaymentController {
     }
 
     @GetMapping("/cancel")
+    @Operation(summary = "Cancel payment for event registration or resource booking")
     public String cancelPayment(@RequestParam String session_id, Authentication connectedUser) throws StripeException {
         Session session = Session.retrieve(session_id);
         String reservationId = session.getMetadata().get("reservation_id");
