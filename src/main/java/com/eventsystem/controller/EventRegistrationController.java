@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // TODO: think of each endpoint, should the admin see it?
-@RequestMapping("/events-registrations")
+@RequestMapping("/api/v1/events/registrations")
 @RestController
 @Tag(name = "Event Registrations", description = "Managing event registrations")
 public class EventRegistrationController {
@@ -24,21 +24,21 @@ public class EventRegistrationController {
         this.registrationService = registrationService;
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get all event registrations", description = "Retrieve a list of all event registrations.")
     public List<RegistrationDto> getAllRegistrations() {
         return registrationService.getAllRegistrations();
     }
 
-    @GetMapping("/organizer/my-registrations")
+    @GetMapping(params = "eventId")
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get the registrations of a specific event", description = "Retrieve a list of all registrations of an event organized by the authenticated organizer.")
     public List<RegistrationDto> getAllRegistrationsByEvent(@RequestParam Long eventId, Authentication connectedUser) {
         return registrationService.getAllRegistrationsByEvent(eventId, connectedUser.getName());
     }
 
-    @GetMapping("/attendee/my-registrations")
+    @GetMapping("/me")
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Get the registrations made by the current attendee", description = "Retrieve a list of all registrations made by the authenticated attendee.")
     public List<RegistrationDto> getAllRegistrationsByAttendee(Authentication connectedUser) {
@@ -55,24 +55,24 @@ public class EventRegistrationController {
     @PostMapping
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Create a new event registration", description = "Create a new registration for an event.")
-    public RegistrationDto createEventRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
-        return registrationService.createEventRegistration(registrationCreationDto, connectedUser);
+    public RegistrationDto createRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
+        return registrationService.createRegistration(registrationCreationDto, connectedUser);
     }
 
-    @PutMapping
-    @PreAuthorize("hasRole('ATTENDEE')")
-    @Operation(summary = "Update an event registration", description = "Update an existing event registration.")
-    public RegistrationDto updateEventRegistration(
-            @RequestParam Long id,
-            @RequestBody RegistrationUpdateDto registrationUpdateDto,
-            Authentication connectedUser) {
-        return registrationService.updateEventRegistration(id, registrationUpdateDto, connectedUser.getName());
-    }
-
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/cancel")
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Cancel an event registration", description = "Cancel an existing event registration.")
-    public void cancelEventRegistration(@PathVariable Long id, Authentication connectedUser) {
-        registrationService.cancelEventRegistration(id, connectedUser.getName());
+    public RegistrationDto cancelRegistration(@PathVariable Long id, Authentication connectedUser) {
+        return registrationService.cancelRegistration(id, connectedUser.getName());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ATTENDEE')")
+    @Operation(summary = "Update an event registration", description = "Update an existing event registration.")
+    public RegistrationDto updateRegistration(
+            @PathVariable Long id,
+            @RequestBody RegistrationUpdateDto registrationUpdateDto,
+            Authentication connectedUser) {
+        return registrationService.updateRegistration(id, registrationUpdateDto, connectedUser.getName());
     }
 }

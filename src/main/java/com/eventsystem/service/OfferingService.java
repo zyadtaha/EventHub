@@ -40,6 +40,16 @@ public class OfferingService {
                 .collect(Collectors.toList());
     }
 
+    public OfferingDto getOfferingById(Long id, Authentication connectedUser) {
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
+                offering.getProviderId().equals(connectedUser.getName())) {
+            return offeringMapper.toDto(offering);
+        } else {
+            throw new IllegalArgumentException("You are not authorized to view this offering");
+        }
+    }
+
     public OfferingDto createOffering(OfferingDto offeringDto, Authentication connectedUser) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
@@ -62,6 +72,7 @@ public class OfferingService {
         offering.setOfferingAreas(newOfferingDto.getOfferingAreas());
         offering.setAvailabilitySlots(newOfferingDto.getAvailabilitySlots());
         offering.setProviderId(providerId);
+        offeringRepository.save(offering);
         return offeringMapper.toDto(offering);
     }
 
