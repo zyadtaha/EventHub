@@ -1,4 +1,4 @@
-package com.eventsystem.utils;
+package com.eventsystem.service;
 
 import com.eventsystem.model.Event;
 import com.eventsystem.model.ResourceBooking;

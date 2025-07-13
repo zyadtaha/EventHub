@@ -6,7 +6,6 @@ import com.eventsystem.dto.resourcebooking.ResourceBookingUpdateDto;
 import com.eventsystem.mapper.ResourceBookingMapper;
 import com.eventsystem.model.ResourceBooking;
 import com.eventsystem.repository.ResourceBookingRepository;
-import com.eventsystem.utils.EmailService;
 import com.stripe.exception.StripeException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
