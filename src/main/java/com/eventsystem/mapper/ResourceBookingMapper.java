@@ -64,8 +64,7 @@ public class ResourceBookingMapper {
         return resourceBooking;
     }
 
-    // TODO: name it updateEntityFromDto?
-    public ResourceBooking updateFromDtoToEntity(ResourceBookingUpdateDto resourceBookingUpdateDto, ResourceBooking resourceBooking){
+    public ResourceBooking updateEntityFromDto(ResourceBookingUpdateDto resourceBookingUpdateDto, ResourceBooking resourceBooking){
         resourceBooking.setStatus(resourceBookingUpdateDto.getStatus());
         resourceBooking.setCancellationTime(resourceBookingUpdateDto.getCancellationTime());
         resourceBooking.setCancelled(resourceBookingUpdateDto.isCancelled());

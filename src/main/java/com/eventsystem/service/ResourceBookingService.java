@@ -20,11 +20,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class ResourceBookingService {
-    // TODO: make this attributes final
-    ResourceBookingRepository resourceBookingRepository;
-    ResourceBookingMapper resourceBookingMapper;
-    EmailService emailService;
-    StripeService stripeService;
+    private final ResourceBookingRepository resourceBookingRepository;
+    private final ResourceBookingMapper resourceBookingMapper;
+    private final EmailService emailService;
+    private final StripeService stripeService;
 
     public ResourceBookingService(ResourceBookingRepository resourceBookingRepository, ResourceBookingMapper resourceBookingMapper, EmailService emailService, StripeService stripeService) {
         this.resourceBookingRepository = resourceBookingRepository;
@@ -58,10 +57,7 @@ public class ResourceBookingService {
 
     public ResourceBookingDto getBookingById(Long id, Authentication connectedUser) {
         ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
-        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER") && resourceBooking.getOrganizerId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_VENUE_PROVIDER") && resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_OFFERING_PROVIDER") && resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(connectedUser.getName()))
-        ) {
+        if(isUserAuthorized(resourceBooking, connectedUser)) {
             return resourceBookingMapper.toDto(resourceBooking);
         } else {
             throw new IllegalArgumentException("You are not authorized to view this booking");
@@ -96,11 +92,8 @@ public class ResourceBookingService {
 
     public ResourceBookingDto updateBooking(Long id, ResourceBookingUpdateDto newBooking, Authentication connectedUser) {
         ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
-        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER") && resourceBooking.getOrganizerId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_VENUE_PROVIDER") && resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_OFFERING_PROVIDER") && resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(connectedUser.getName()))
-        ) {
-            ResourceBooking b = resourceBookingMapper.updateFromDtoToEntity(newBooking, resourceBooking);
+        if(isUserAuthorized(resourceBooking, connectedUser)) {
+            ResourceBooking b = resourceBookingMapper.updateEntityFromDto(newBooking, resourceBooking);
             resourceBookingRepository.save(b);
             return resourceBookingMapper.toDto(b);
         } else {
@@ -110,10 +103,7 @@ public class ResourceBookingService {
 
     public void cancelBooking(Long id, Authentication connectedUser) {
         ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
-        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER") && resourceBooking.getOrganizerId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_VENUE_PROVIDER") && resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(connectedUser.getName())) ||
-                connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_OFFERING_PROVIDER") && resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(connectedUser.getName()))
-        ) {
+        if(isUserAuthorized(resourceBooking, connectedUser)) {
             resourceBooking.setCancelled(true);
             resourceBooking.setCancellationTime(java.time.LocalDateTime.now());
             resourceBooking.setStatus(ResourceBooking.Status.CANCELLED);
@@ -142,6 +132,13 @@ public class ResourceBookingService {
         resourceBooking.setStatus(ResourceBooking.Status.CONFIRMED);
         resourceBookingRepository.save(resourceBooking);
         emailService.sendBookingConfirmation(resourceBooking, organizerEmail);
+    }
+
+    private boolean isUserAuthorized(ResourceBooking resourceBooking, Authentication connectedUser) {
+        String userId = connectedUser.getName();
+        return resourceBooking.getOrganizerId().equals(userId) ||
+                (resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(userId)) ||
+                (resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(userId));
     }
 }
 
