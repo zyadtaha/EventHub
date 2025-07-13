@@ -36,7 +36,12 @@ public class EventController {
         return eventService.getAllEventsByOrganizer(connectedUser.getName());
     }
 
-    // TODO: add an endpoint to get a venue by its ID
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ATTENDEE')")
+    @Operation(summary = "Get an event by ID", description = "Retrieve the details of a specific event by its ID")
+    public EventDto getEventById(@PathVariable Long id, Authentication connectedUser){
+        return eventService.getEventById(id, connectedUser);
+    }
 
     @PostMapping()
     @Operation(summary = "Create a new event", description = "Create a new event managed by the authenticated organizer")

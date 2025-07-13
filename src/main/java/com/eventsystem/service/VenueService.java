@@ -40,6 +40,16 @@ public class VenueService {
                 .collect(Collectors.toList());
     }
 
+    public VenueDto getVenueById(Long id, Authentication connectedUser) {
+        Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
+                venue.getProviderId().equals(connectedUser.getName())) {
+            return venueMapper.toDto(venue);
+        } else {
+            throw new IllegalArgumentException("You are not authorized to view this venue");
+        }
+    }
+
     public VenueDto createVenue(VenueDto venueDto, Authentication connectedUser) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();

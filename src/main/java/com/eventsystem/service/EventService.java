@@ -6,6 +6,7 @@ import com.eventsystem.dto.EventUpdateDto;
 import com.eventsystem.mapper.EventMapper;
 import com.eventsystem.model.Event;
 import com.eventsystem.repository.EventRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +38,15 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    public EventDto getEventById(Long id, Authentication connectedUser) {
+        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ATTENDEE")) ||
+                event.getOrganizerId().equals(connectedUser.getName())) {
+            return eventMapper.toDto(event);
+        } else {
+            throw new IllegalArgumentException("You are not authorized to view this event");
+        }
+    }
 
     public EventDto createEvent(EventCreationDto eventDto, String organizerId) {
         Event event = eventMapper.toEntity(eventDto, organizerId);

@@ -35,7 +35,12 @@ public class OfferingController {
         return offeringService.getAllOfferingsByProvider(connectedUser.getName());
     }
 
-    // TODO: add an endpoint to get a offering by its ID
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER')")
+    @Operation(summary = "Get an offering by ID", description = "Retrieve the details of a specific offering by its ID.")
+    public OfferingDto getOfferingById(@PathVariable Long id, Authentication connectedUser) {
+        return offeringService.getOfferingById(id, connectedUser);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new offering", description = "Create a new offering managed by the authenticated offering provider.")

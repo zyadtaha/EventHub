@@ -35,7 +35,12 @@ public class VenueController {
         return venueService.getAllVenuesByProvider(connectedUser.getName());
     }
 
-    // TODO: add an endpoint to get a venue by its ID
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
+    @Operation(summary = "Get a venue by ID", description = "Retrieve the details of a specific venue by its ID.")
+    public VenueDto getVenueById(@RequestParam Long id, Authentication connectedUser){
+        return venueService.getVenueById(id, connectedUser);
+    }
 
     @PostMapping()
     @Operation(summary = "Create a new venue", description = "Create a new venue managed by the authenticated venue provider.")
