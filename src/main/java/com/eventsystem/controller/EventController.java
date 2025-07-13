@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/api/v1/events")
 @PreAuthorize("hasRole('ORGANIZER')")
 @Tag(name = "Event", description = "Managing events")
 public class EventController {
@@ -23,14 +23,14 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Get all events", description = "Retrieve a list of all available events")
     public List<EventDto> getAllEvents(){
         return eventService.getAllEvents();
     }
 
-    @GetMapping("/my-events")
+    @GetMapping("/mine")
     @Operation(summary = "Get the events created by the current organizer", description = "Retrieve a list of the events created by the authenticated organizer")
     public List<EventDto> getAllEventsByOrganizer(Authentication connectedUser){
         return eventService.getAllEventsByOrganizer(connectedUser.getName());

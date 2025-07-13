@@ -41,20 +41,19 @@ public class ResourceBookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<ResourceBookingDto> getAllBookingsByOrganizer(Authentication connectedUser) {
-        return resourceBookingRepository
-                .findByOrganizerId(connectedUser.getName())
-                .stream()
-                .map(resourceBookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<ResourceBookingDto> getAllBookingsByProvider(Authentication connectedUser) {
-        return resourceBookingRepository
-                .findByProviderId(connectedUser.getName())
-                .stream()
-                .map(resourceBookingMapper::toDto)
-                .collect(Collectors.toList());
+    public List<ResourceBookingDto> getBookingsByUserId(Authentication connectedUser) {
+        String userId = connectedUser.getName();
+        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER"))) {
+            return resourceBookingRepository.findByOrganizerId(userId)
+                    .stream()
+                    .map(resourceBookingMapper::toDto)
+                    .collect(Collectors.toList());
+        } else {
+            return resourceBookingRepository.findByProviderId(userId)
+                    .stream()
+                    .map(resourceBookingMapper::toDto)
+                    .collect(Collectors.toList());
+        }
     }
 
     public ResourceBookingDto getBookingById(Long id, Authentication connectedUser) {

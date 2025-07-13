@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api/v1/payments")
 @Tag(name = "Payment", description = "Payment management for event registrations and resource bookings")
 public class PaymentController {
     private final EventRegistrationService registrationService;
@@ -45,7 +45,7 @@ public class PaymentController {
         String reservationId = session.getMetadata().get("reservation_id");
         String isEventRegistration = session.getMetadata().get("is_registration");
         if (Boolean.parseBoolean(isEventRegistration)) {
-            registrationService.cancelEventRegistration(Long.parseLong(reservationId), connectedUser.getName());
+            registrationService.cancelRegistration(Long.parseLong(reservationId), connectedUser.getName());
         } else {
             bookingService.cancelBooking(Long.parseLong(reservationId), connectedUser);
         }

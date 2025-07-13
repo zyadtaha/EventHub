@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/venues")
+@RequestMapping("/api/v1/venues")
 @PreAuthorize("hasRole('VENUE_PROVIDER')")
 @Tag(name = "Venue", description = "Manage venues for events")
 public class VenueController {
@@ -22,14 +22,14 @@ public class VenueController {
         this.venueService = venueService;
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get all venues", description = "Retrieve a list of all available venues.")
     public List<VenueDto> getAllVenues(){
         return venueService.getAllVenues();
     }
 
-    @GetMapping("/my-venues")
+    @GetMapping("/mine")
     @Operation(summary = "Get the venues owned by the current provider", description = "Retrieve a list of all venues managed by the authenticated venue provider.")
     public List<VenueDto> getAllVenuesByProvider(Authentication connectedUser){
         return venueService.getAllVenuesByProvider(connectedUser.getName());
@@ -38,7 +38,7 @@ public class VenueController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
     @Operation(summary = "Get a venue by ID", description = "Retrieve the details of a specific venue by its ID.")
-    public VenueDto getVenueById(@RequestParam Long id, Authentication connectedUser){
+    public VenueDto getVenueById(@PathVariable Long id, Authentication connectedUser){
         return venueService.getVenueById(id, connectedUser);
     }
 

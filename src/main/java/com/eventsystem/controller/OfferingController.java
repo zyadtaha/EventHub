@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/offerings")
+@RequestMapping("/api/v1/offerings")
 @PreAuthorize("hasRole('OFFERING_PROVIDER')")
 @Tag(name = "Offering", description = "Manage offerings for events")
 public class OfferingController {
@@ -22,14 +22,14 @@ public class OfferingController {
         this.offeringService = offeringService;
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get all offerings", description = "Retrieve a list of all available offerings.")
     public List<OfferingDto> getAllOfferings() {
         return offeringService.getAllOfferings();
     }
 
-    @GetMapping("/my-offerings")
+    @GetMapping("/mine")
     @Operation(summary = "Get the offerings owned by the current provider", description = "Retrieve a list of all offerings managed by the authenticated offering provider.")
     public List<OfferingDto> getAllOfferingsByProvider(Authentication connectedUser) {
         return offeringService.getAllOfferingsByProvider(connectedUser.getName());
@@ -79,7 +79,7 @@ public class OfferingController {
     @GetMapping("/{id}/availability")
     @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER')")
     @Operation(summary = "Get the availability slots of a specific offering", description = "Retrieve a list of all availability slots for a specific offering.")
-    public List<Offering.AvailabilitySlot> getAllAvailabilitySlot(@PathVariable Long id) {
+    public List<Offering.AvailabilitySlot> getAllAvailabilitySlots(@PathVariable Long id) {
         return offeringService.getAllAvailabilitySlot(id);
     }
 

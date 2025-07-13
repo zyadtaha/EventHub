@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resource-bookings")
+@RequestMapping("/api/v1/bookings")
 @Tag(name = "Resource Booking", description = "Manage resource bookings for events")
 public class ResourceBookingController {
     private final ResourceBookingService resourceBookingService;
@@ -23,25 +23,18 @@ public class ResourceBookingController {
         this.resourceBookingService = resourceBookingService;
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get all resource bookings", description = "Retrieve a list of all resource bookings.")
     public List<ResourceBookingDto> getAllBookings() {
         return resourceBookingService.getAllBookings();
     }
 
-    @GetMapping("/organizer/my-bookings")
-    @PreAuthorize("hasRole('ORGANIZER')")
-    @Operation(summary = "Get the bookings made by the current organizer", description = "Retrieve a list of all bookings made by the authenticated organizer.")
-    public List<ResourceBookingDto> getAllBookingsByOrganizer(Authentication connectedUser) {
-        return resourceBookingService.getAllBookingsByOrganizer(connectedUser);
-    }
-
-    @GetMapping("/provider/my-bookings")
-    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
-    @Operation(summary = "Get the bookings accepted by the current provider", description = "Retrieve a list of all bookings accepted by the authenticated venue or offering provider.")
-    public List<ResourceBookingDto> getAllBookingsByProvider(Authentication connectedUser) {
-        return resourceBookingService.getAllBookingsByProvider(connectedUser);
+    @GetMapping("/mine")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @Operation(summary = "Get bookings for the current user", description = "Retrieve bookings filtered by the authenticated user's role.")
+    public List<ResourceBookingDto> getBookingsByUserId(Authentication connectedUser) {
+        return resourceBookingService.getBookingsByUserId(connectedUser);
     }
 
     @GetMapping("/{id}")
@@ -58,17 +51,17 @@ public class ResourceBookingController {
         return resourceBookingService.createBooking(resourceBookingCreationDto, connectedUser);
     }
 
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @Operation(summary = "Cancel a resource booking", description = "Cancel an existing resource booking.")
+    public void cancelBooking(@PathVariable Long id, Authentication connectedUser) {
+        resourceBookingService.cancelBooking(id, connectedUser);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
     @Operation(summary = "Update an existing resource booking", description = "Update the details of an existing resource booking.")
     public ResourceBookingDto updateBooking(@PathVariable Long id, @RequestBody ResourceBookingUpdateDto resourceBookingUpdateDto, Authentication connectedUser) {
         return resourceBookingService.updateBooking(id, resourceBookingUpdateDto, connectedUser);
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
-    @Operation(summary = "Cancel a resource booking", description = "Cancel an existing resource booking.")
-    public void cancelBooking(@PathVariable Long id, Authentication connectedUser) {
-        resourceBookingService.cancelBooking(id, connectedUser);
     }
 }

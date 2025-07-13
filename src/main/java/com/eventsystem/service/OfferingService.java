@@ -72,6 +72,7 @@ public class OfferingService {
         offering.setOfferingAreas(newOfferingDto.getOfferingAreas());
         offering.setAvailabilitySlots(newOfferingDto.getAvailabilitySlots());
         offering.setProviderId(providerId);
+        offeringRepository.save(offering);
         return offeringMapper.toDto(offering);
     }
 

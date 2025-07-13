@@ -72,7 +72,7 @@ public class EventRegistrationService {
     }
 
     @Transactional
-    public RegistrationDto createEventRegistration(RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
+    public RegistrationDto createRegistration(RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
         String attendeeName = jwt.getClaimAsString("preferred_username");
@@ -95,7 +95,7 @@ public class EventRegistrationService {
         return registrationMapper.toDto(registration);
     }
 
-    public RegistrationDto updateEventRegistration(Long id, RegistrationUpdateDto registrationUpdateDto, String attendeeId) {
+    public RegistrationDto updateRegistration(Long id, RegistrationUpdateDto registrationUpdateDto, String attendeeId) {
         EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
         if (!registration.getAttendeeId().equals(attendeeId)) {
             throw new IllegalArgumentException("You are not authorized to update this registration");
@@ -109,7 +109,7 @@ public class EventRegistrationService {
         return registrationMapper.toDto(registration);
     }
 
-    public void cancelEventRegistration(Long id, String attendeeId) {
+    public RegistrationDto cancelRegistration(Long id, String attendeeId) {
         EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
         if (!registration.getAttendeeId().equals(attendeeId)) {
             throw new IllegalArgumentException("You are not authorized to cancel this registration");
@@ -121,6 +121,7 @@ public class EventRegistrationService {
 
         Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
         emailService.sendAttendeeCancellation(registration.getAttendeeEmail(), event);
+        return registrationMapper.toDto(registration);
     }
 
     @Transactional
