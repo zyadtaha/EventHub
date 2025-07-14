@@ -17,7 +17,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private LocalDateTime dateTime;
 
     @Column(nullable = false, updatable = false)
     private String organizerId;
@@ -25,8 +24,17 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResourceBooking> resourceBookings = new ArrayList<>();
 
+    @Column(nullable = false)
     private Integer retailPrice;
+
+    @Column(nullable = false)
+    private LocalDateTime startDateTime;
+    @Column(nullable = false)
+    private LocalDateTime endDateTime;
+
     private LocalDateTime creationTime = LocalDateTime.now();
+    private LocalDateTime cancellationTime;
+    private boolean isCancelled = false;
 
     public boolean canCancelWithoutPenalty() {
         LocalDateTime freeCancellationDeadline = creationTime.plusHours(48);

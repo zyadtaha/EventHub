@@ -31,8 +31,8 @@ public class EventReminderService {
                 .findAll()
                 .stream()
                 .filter(event ->
-                        !event.getDateTime().isBefore(startOfDay) &&
-                                !event.getDateTime().isAfter(endOfDay)
+                        !event.getStartDateTime().isBefore(startOfDay) &&
+                                !event.getStartDateTime().isAfter(endOfDay)
                 )
                 .forEach(event -> {
                     eventRegistrationRepository.findAll().stream()

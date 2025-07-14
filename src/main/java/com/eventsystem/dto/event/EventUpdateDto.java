@@ -1,4 +1,4 @@
-package com.eventsystem.dto;
+package com.eventsystem.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 public class EventUpdateDto {
     private String name;
-    private LocalDateTime dateTime;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
     private Integer retailPrice;
     private List<Long> bookingIds;
 }
