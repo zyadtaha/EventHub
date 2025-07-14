@@ -1,5 +1,6 @@
 package com.eventsystem.dto.event;
 
+import com.eventsystem.model.Event.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,4 +13,5 @@ public class EventCreationDto {
     private Integer retailPrice;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
+    private EventType type;
 }

@@ -30,6 +30,7 @@ public class EventMapper {
                         .map(resourceBookingMapper::toDto)
                         .toList(),
                 event.getRetailPrice(),
+                event.getType(),
                 event.getCreationTime(),
                 event.canCancelWithoutPenalty(),
                 event.calculateCancellationPenalty(),
@@ -45,6 +46,7 @@ public class EventMapper {
         event.setEndDateTime(eventCreationDto.getEndDateTime());
         event.setRetailPrice(eventCreationDto.getRetailPrice());
         event.setOrganizerId(organizerId);
+        event.setType(eventCreationDto.getType());
         return event;
     }
 

@@ -1,6 +1,7 @@
 package com.eventsystem.controller;
 
 import com.eventsystem.dto.VenueDto;
+import com.eventsystem.model.Event.EventType;
 import com.eventsystem.model.Venue;
 import com.eventsystem.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,13 +11,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/venues")
 @PreAuthorize("hasRole('VENUE_PROVIDER')")
 @Tag(name = "Venue", description = "Manage venues for events")
 public class VenueController {
-    private VenueService venueService;
+    private final VenueService venueService;
 
     public VenueController(VenueService venueService) {
         this.venueService = venueService;
@@ -42,10 +44,31 @@ public class VenueController {
         return venueService.getVenueById(id, connectedUser);
     }
 
+    @GetMapping("/eligible")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
+    @Operation(summary = "Get eligible venues for an event type", description = "Retrieve a list of venues that are eligible for a specific event type.")
+    public List<VenueDto> getEligibleVenues(@RequestParam EventType eventType) {
+        return venueService.findEligibleVenues(eventType);
+    }
+
     @PostMapping()
     @Operation(summary = "Create a new venue", description = "Create a new venue managed by the authenticated venue provider.")
     public VenueDto createVenue(@RequestBody VenueDto venueDto, Authentication connectedUser){
         return venueService.createVenue(venueDto, connectedUser);
+    }
+
+    @PostMapping("/eligibility/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Add eligible event types to a venue type (Admin only)", description = "Allows an admin to add event types that are eligible for a specific venue type.")
+    public void addEligibleEventTypes(@RequestParam Venue.VenueType venueType, @RequestBody Set<EventType> eventsToAdd) {
+        venueService.addEligibleEventTypes(venueType, eventsToAdd);
+    }
+
+    @PostMapping("/eligibility/remove")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Remove eligible event types from a venue type (Admin only)", description = "Allows an admin to remove event types that are no longer eligible for a specific venue type.")
+    public void removeEligibleEventTypes(@RequestParam Venue.VenueType venueType, @RequestBody Set<EventType> eventsToRemove) {
+        venueService.removeEligibleEventTypes(venueType, eventsToRemove);
     }
 
     @PutMapping("/{id}")

@@ -15,7 +15,6 @@ public class Venue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String type;
     private String location;
     private Integer minCapacity;
     private Integer maxCapacity;
@@ -30,9 +29,15 @@ public class Venue {
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <ResourceBooking> resourceBookings;
 
-    // TODO: make the venue type compatible with the event
+    @Enumerated(EnumType.STRING)
+    private VenueType type;
+
+    public enum VenueType {
+        PRIVATE, PUBLIC, INSTITUTION, OUTDOOR, THEATER_ARENA
+    }
+
     public Venue(String name,
-                 String type,
+                 VenueType type,
                  String location,
                  Integer minCapacity,
                  Integer maxCapacity,

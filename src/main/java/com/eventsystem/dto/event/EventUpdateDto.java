@@ -13,5 +13,6 @@ public class EventUpdateDto {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private Integer retailPrice;
+    // TODO: should be addition to the existing bookings, not a replacement
     private List<Long> bookingIds;
 }

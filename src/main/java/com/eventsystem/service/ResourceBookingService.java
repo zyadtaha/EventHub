@@ -23,12 +23,14 @@ public class ResourceBookingService {
     private final ResourceBookingMapper resourceBookingMapper;
     private final EmailService emailService;
     private final StripeService stripeService;
+    private final VenueService venueService;
 
-    public ResourceBookingService(ResourceBookingRepository resourceBookingRepository, ResourceBookingMapper resourceBookingMapper, EmailService emailService, StripeService stripeService) {
+    public ResourceBookingService(ResourceBookingRepository resourceBookingRepository, ResourceBookingMapper resourceBookingMapper, EmailService emailService, StripeService stripeService, VenueService venueService) {
         this.resourceBookingRepository = resourceBookingRepository;
         this.resourceBookingMapper = resourceBookingMapper;
         this.emailService = emailService;
         this.stripeService = stripeService;
+        this.venueService = venueService;
     }
 
     public List<ResourceBookingDto> getAllBookings() {
@@ -69,6 +71,9 @@ public class ResourceBookingService {
         ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto, organizerId);
         if(!resourceBooking.getEvent().getOrganizerId().equals(organizerId)){
             throw new IllegalArgumentException("You are not authorized to create a booking to this event");
+        }
+        if (resourceBooking.getVenue() != null && !venueService.isVenueSuitableForEventType(resourceBooking.getVenue().getId(), resourceBooking.getEvent().getType())) {
+            throw new IllegalArgumentException("Selected venue is not suitable for this event type");
         }
         resourceBookingRepository.save(resourceBooking);
 

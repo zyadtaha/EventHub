@@ -36,6 +36,15 @@ public class Event {
     private LocalDateTime cancellationTime;
     private boolean isCancelled = false;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EventType type;
+
+    public enum EventType {
+        WEDDING, ENGAGEMENT_PARTY, BIRTHDAY,
+        CONFERENCE, WORKSHOP, SEMINAR
+    }
+
     public boolean canCancelWithoutPenalty() {
         LocalDateTime freeCancellationDeadline = creationTime.plusHours(48);
         return LocalDateTime.now().isBefore(freeCancellationDeadline);
