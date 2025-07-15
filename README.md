@@ -1,41 +1,44 @@
-// TODO: update README
 # EventHub: A Backend Spring Boot Application
 
 ![image](https://github.com/user-attachments/assets/c79dbc50-c660-41ea-8900-20f382837a66)
-
 
 ![](https://img.shields.io/badge/Spring_Boot-F2F4F9?style=for-the-badge&logo=spring-boot)
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 ![](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white)
 ![Keycloak](https://img.shields.io/badge/Keycloak-6A0DAD.svg?style=for-the-badge&logo=keycloak&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=Stripe&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 ![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
 
 Welcome to EventHub, an application for managing events, venues, offerings, and attendee registrations to have a successful journey.
 
 ## Features
 
-- **Event Management**: Create, update, and manage events with full lifecycle support
-- **Venue Management**: Venue providers can list and manage their venues for event bookings
-- **Service Offerings**: Providers can offer catering, decoration, photography, and security services
-- **Event Registration**: Attendees can register for events with automated email notifications
-- **Role-Based Security**: Comprehensive authentication and authorization using OAuth2/JWT
-- **Email Notifications**: Automated email system for registrations and event reminders
+- **Event Management**: Create, update, and cancel events with full lifecycle management
+- **Venue & Resource Booking**: Book venues and resources with payment integration
+- **Event Registration**: Attendee registration system with confirmation and cancellation
+- **Dashboard Analytics**: Real-time metrics and statistics for administrators
+- **Payment Processing**: Stripe integration for secure payments
+- **Authentication**: JWT-based authentication via Keycloak
+- **Email Notifications**: Automated email notifications for bookings and registrations
 
 ## Technology Stack
 
 - **Framework**: Spring Boot 3.5.3 with Java 21
 - **Database**: PostgreSQL with Spring Data JPA
 - **Security**: OAuth2/JWT with Keycloak
+- **Payments**: Stripe API integration
 - **Email**: Spring Boot Mail Starter
 - **ORM**: Hibernate/JPA
 - **Build Tool**: Maven
+- **API Docs**: Swagger/OpenAPI
 
 ## Prerequisites
 
-- Java 21
 - Docker and Docker Compose
-- Maven
+- Java 21 (for local development)
+- Maven 3.9+ (for local development)
 
 ## Quick Start
 
@@ -45,31 +48,40 @@ Welcome to EventHub, an application for managing events, venues, offerings, and 
    cd EventHub
    ```
 
-2. **Start infrastructure services**
+2. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   EMAIL_USERNAME=your-email@gmail.com
+   EMAIL_PASSWORD=your-app-password
+   STRIPE_API_KEY=your-stripe-api-key
+   ```
+3. **Start the application**
    ```bash
    docker-compose up -d
    ```
-   This starts:
-    - PostgreSQL database on port 5332
-    - Keycloak identity server on port 9090
 
-3. **Create a `.env` file in the root directory** with the following content:
-   ```env
-   EMAIL_USERNAME=your_email
-   EMAIL_PASSWORD=your_password
-   ```
-    Replace `your_email` and `your_password` with your actual email credentials for sending notifications.
+## Services
 
-4. **Build and run the application**
-   ```bash
-   mvn spring-boot:run
-   ```
+The application runs three main services:
 
-The application will be available at `http://localhost:8080`.
+- **PostgreSQL Database** (`eventhub-db`): Port 5332 
+- **Keycloak Authentication** (`eventhub-auth`): Port 9090
+- **Spring Boot Application** (`eventhub-app`): Port 8080
+
+## API Documentation
+
+Once running, access the Swagger UI documentation at:
+```
+http://localhost:8080/swagger-ui/index.html
+```
+## Postman Collection
+
+A ready-to-use Postman collection for testing authentication and API endpoints is available in the `postman/Keycloak users for testing.postman_collection.json` file.  
+Import this collection into Postman to quickly get tokens for different user roles and test secured endpoints.
 
 ## Core Domain Models
 
-![image](https://github.com/user-attachments/assets/5869eced-0b8a-4cca-a3f6-1d648ed7974f)
+<img width="788" height="811" alt="image" src="https://github.com/user-attachments/assets/e82f005f-d7be-406b-be9a-9e4ee27a065a" />
 
 The system is built around five primary domain entities that represent the core business concepts:
 
@@ -83,31 +95,23 @@ The system is built around five primary domain entities that represent the core 
 
 5. **Event Registration:** Tracks attendee registrations for events.
 
-## API Endpoints
-
-The system provides RESTful APIs for:
-- Event management (`/events`)
-- Venue management (`/venues`)
-- Offering management (`/offerings`)
-- Resource booking (`/resource-bookings`)
-- Event registration (`/events-registrations`)
-
 ## User Roles
 
-- ADMIN: System administrators
-- ORGANIZER: Event organizers
-- ATTENDEE: Event attendees
-- VENUE_PROVIDER: Venue providers
-- OFFERING_PROVIDER: Service providers
+The system supports multiple user roles with different permissions:
+- **Admin**: Full system access and dashboard statistics
+- **Organizer**: Create and manage events, book resources (venues and offerings)
+- **Venue Provider**: Manage venue bookings
+- **Offering Provider**: Manage service offerings
+- **Attendee**: Register for events and make payments
 
 ## Automated Features
 
 - **Event Reminders**: Daily scheduled task sends email reminders to attendees for events happening the next day
 - **Email Notifications**: Automatic emails for registration confirmations, updates, and cancellations
+- **Dashboard Statistics**: Real-time metrics for system usage and event analytics
 
 ## Project Structure
 ```
-src/
 src/
 ├── main/java/com/eventsystem/
 │   ├── dto/           # Data Transfer Objects
@@ -116,20 +120,19 @@ src/
 │   ├── repository/    # Data access layer
 │   ├── service/       # Business logic
 │   ├── controller/    # REST controllers
-│   ├── utils/         # Email notification utilities
-│   └── config/        # Security and app configurations
+│   └── config/        # Configurations
 └── main/resources/
     └── application.properties
 ```
 
-
 ## Future Improvements
-- Add Stripe integration for payment processing
-- Implement search and filtering for events, venues and offerings
-- Add venue type mapping to an event type for better matching
-- Document APIs with Swagger/OpenAPI
-- Write unit and integration tests
-- Add frontend application using React
+- [x] Add Stripe integration for payment processing
+- [ ] Implement search and filtering for events, venues and offerings
+- [x] Add venue type mapping to an event type for better matching
+- [ ] Add more statistics to the dashboard (e.g., revenue per organizer, user breakdown)
+- [x] Document APIs with Swagger/OpenAPI
+- [ ] Write unit and integration tests 
+- [ ] Add frontend application using React
 
 ## Contributing
 Contributions are welcome! Please follow these steps:
