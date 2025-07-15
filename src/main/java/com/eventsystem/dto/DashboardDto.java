@@ -18,10 +18,10 @@ public class DashboardDto {
 
     public EventStatusCount eventStatusCount;
     public double venueUtilizationRate;
+    public List<Integer> dailyCancellationCount;
+    public List<Integer> dailyBookingCount;
     // TODO: add these fields
     // public Map<String, Integer> eventTypeDistribution;
-    // public List<Integer> dailyCancellationCount;
-    // public List<Integer> dailyBookingCount;
     // public double offeringProvidersUtilizationRate;
     // public Map<String, Double> revenuePerOrganizer;
     // public UserBreakdown userBreakdown;
