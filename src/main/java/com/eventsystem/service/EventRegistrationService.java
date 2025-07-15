@@ -8,7 +8,6 @@ import com.eventsystem.model.Event;
 import com.eventsystem.model.EventRegistration;
 import com.eventsystem.repository.EventRegistrationRepository;
 import com.eventsystem.repository.EventRepository;
-import com.eventsystem.utils.EmailService;
 import com.stripe.exception.StripeException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;

@@ -1,3 +1,4 @@
+// TODO: update README
 # EventHub: A Backend Spring Boot Application
 
 ![image](https://github.com/user-attachments/assets/c79dbc50-c660-41ea-8900-20f382837a66)

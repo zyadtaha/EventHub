@@ -1,8 +1,8 @@
 package com.eventsystem.controller;
 
-import com.eventsystem.dto.EventCreationDto;
-import com.eventsystem.dto.EventDto;
-import com.eventsystem.dto.EventUpdateDto;
+import com.eventsystem.dto.event.EventCreationDto;
+import com.eventsystem.dto.event.EventDto;
+import com.eventsystem.dto.event.EventUpdateDto;
 import com.eventsystem.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,15 +49,15 @@ public class EventController {
         return eventService.createEvent(eventDto, connectedUser.getName());
     }
 
+    @PostMapping("/{id}/cancel")
+    @Operation(summary = "Cancel an event", description = "Cancel an event managed by the authenticated organizer")
+    public void cancelEvent(@PathVariable Long id, Authentication connectedUser){
+        eventService.cancelEvent(id, connectedUser.getName());
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing event", description = "Update the details of an existing event managed by the authenticated organizer")
     public EventDto updateEvent(@PathVariable Long id, @RequestBody EventUpdateDto eventDto, Authentication connectedUser){
         return eventService.updateEvent(id, eventDto, connectedUser.getName());
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete an event", description = "Delete an existing event managed by the authenticated organizer")
-    public void deleteEvent(@PathVariable Long id, Authentication connectedUser){
-        eventService.deleteEvent(id, connectedUser.getName());
     }
 }

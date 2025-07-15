@@ -1,8 +1,8 @@
 package com.eventsystem.service;
 
-import com.eventsystem.dto.EventCreationDto;
-import com.eventsystem.dto.EventDto;
-import com.eventsystem.dto.EventUpdateDto;
+import com.eventsystem.dto.event.EventCreationDto;
+import com.eventsystem.dto.event.EventDto;
+import com.eventsystem.dto.event.EventUpdateDto;
 import com.eventsystem.mapper.EventMapper;
 import com.eventsystem.model.Event;
 import com.eventsystem.repository.EventRepository;
@@ -64,11 +64,13 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    public void deleteEvent(Long id, String organizerId) {
+    public void cancelEvent(Long id, String organizerId) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
         if (!event.getOrganizerId().equals(organizerId)) {
-            throw new IllegalArgumentException("You are not authorized to delete this event");
+            throw new IllegalArgumentException("You are not authorized to cancel this event");
         }
-        eventRepository.delete(event);
+        event.setCancelled(true);
+        event.setCancellationTime(java.time.LocalDateTime.now());
+        eventRepository.save(event);
     }
 }

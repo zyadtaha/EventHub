@@ -1,4 +1,4 @@
-package com.eventsystem.utils;
+package com.eventsystem.service;
 
 import com.eventsystem.model.Event;
 import com.eventsystem.model.ResourceBooking;
@@ -51,9 +51,10 @@ public class EmailService {
     public void sendAttendeeInvitation(String attendeeEmail, Event event) {
         String subject = "Event Invitation";
         String body = String.format(
-                "You're invited to %s\nDate: %s\n",
+                "You're invited to %s\nStart Time: %s\nEnd Time: %s\n",
                 event.getName(),
-                event.getDateTime()
+                event.getStartDateTime(),
+                event.getEndDateTime()
         );
         sendEmail(attendeeEmail, subject, body);
     }
@@ -61,9 +62,10 @@ public class EmailService {
     public void sendAttendeeUpdate(String attendeeEmail, Event event) {
         String subject = "Event Updates";
         String body = String.format(
-                "Update for %s:\nNew Details:\nDate: %s",
+                "Update for %s:\nNew Details:\nStart Time: %s\nEnd Time: %s\n",
                 event.getName(),
-                event.getDateTime()
+                event.getStartDateTime(),
+                event.getEndDateTime()
         );
         sendEmail(attendeeEmail, subject, body);
     }
@@ -71,9 +73,10 @@ public class EmailService {
     public void sendAttendeeReminder(String attendeeEmail, Event event) {
         String subject = "Reminder: " + event.getName() + " is coming up!";
         String body = String.format(
-                "This is a reminder for %s\nDate: %s\nStarts in 24 hours!",
+                "This is a reminder for %s\nStarts in 24 hours!\nStart Time: %s\nEnd Time: %s\n",
                 event.getName(),
-                event.getDateTime()
+                event.getStartDateTime(),
+                event.getEndDateTime()
         );
         sendEmail(attendeeEmail, subject, body);
     }
