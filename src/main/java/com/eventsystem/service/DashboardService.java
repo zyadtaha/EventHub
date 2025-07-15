@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -74,6 +75,11 @@ public class DashboardService {
         }
         dashboardDto.venueUtilizationRate = (double) bookedVenues / totalVenues;
 
+        dashboardDto.eventTypeDistribution = events.stream()
+                .collect(Collectors.groupingBy(
+                        e -> e.getType().name(),
+                        Collectors.reducing(0, e -> 1, Integer::sum)
+                ));
         return dashboardDto;
     }
 }
