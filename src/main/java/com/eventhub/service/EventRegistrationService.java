@@ -1,5 +1,6 @@
 package com.eventhub.service;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.eventregistration.RegistrationCreationDto;
 import com.eventhub.dto.eventregistration.RegistrationDto;
 import com.eventhub.dto.eventregistration.RegistrationUpdateDto;
@@ -9,6 +10,10 @@ import com.eventhub.model.EventRegistration;
 import com.eventhub.repository.EventRegistrationRepository;
 import com.eventhub.repository.EventRepository;
 import com.stripe.exception.StripeException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -35,31 +40,65 @@ public class EventRegistrationService {
         this.stripeService = stripeService;
     }
 
-    public List<RegistrationDto> getAllRegistrations() {
-        return registrationRepository.findAll()
+    public PageResponse<RegistrationDto> getAllRegistrations(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
+        Page<EventRegistration> registrations = registrationRepository.findAll(pageable);
+        List<RegistrationDto> registrationDtos = registrations
                 .stream()
                 .map(registrationMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                registrationDtos,
+                registrations.getNumber(),
+                registrations.getSize(),
+                registrations.getTotalElements(),
+                registrations.getTotalPages(),
+                registrations.isFirst(),
+                registrations.isLast()
+        );
     }
 
-    public List<RegistrationDto> getAllRegistrationsByEvent(Long eventId, String organizerId) {
+    public PageResponse<RegistrationDto> getAllRegistrationsByEvent(int pageNumber, int pageSize, Long eventId, String organizerId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
         if(!event.getOrganizerId().equals(organizerId)) {
             throw new IllegalArgumentException("You are not authorized to view registrations for this event");
         }
-        return registrationRepository
-                .findByEventId(eventId)
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
+        Page<EventRegistration> registrations = registrationRepository.findByEventId(eventId, pageable);
+        List<RegistrationDto> registrationDtos = registrations
                 .stream()
                 .map(registrationMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                registrationDtos,
+                registrations.getNumber(),
+                registrations.getSize(),
+                registrations.getTotalElements(),
+                registrations.getTotalPages(),
+                registrations.isFirst(),
+                registrations.isLast()
+        );
     }
 
-    public List<RegistrationDto> getAllRegistrationsByAttendee(String attendeeId) {
-        return registrationRepository
-                .findByAttendeeId(attendeeId)
+    public PageResponse<RegistrationDto> getAllRegistrationsByAttendee(int pageNumber, int pageSize, String attendeeId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
+        Page<EventRegistration> registrations = registrationRepository.findByAttendeeId(attendeeId, pageable);
+        List<RegistrationDto> registrationDtos = registrations
                 .stream()
                 .map(registrationMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                registrationDtos,
+                registrations.getNumber(),
+                registrations.getSize(),
+                registrations.getTotalElements(),
+                registrations.getTotalPages(),
+                registrations.isFirst(),
+                registrations.isLast()
+        );
     }
 
     public RegistrationDto getRegistrationById(Long id, String userId) {

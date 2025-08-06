@@ -1,5 +1,6 @@
 package com.eventhub.controller;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.event.EventCreationDto;
 import com.eventhub.dto.event.EventDto;
 import com.eventhub.dto.event.EventUpdateDto;
@@ -9,8 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/events")
@@ -26,15 +25,21 @@ public class EventController {
     @GetMapping()
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Get all events", description = "Retrieve a list of all available events")
-    // TODO: Pagination
-    public List<EventDto> getAllEvents(){
-        return eventService.getAllEvents();
+    public PageResponse<EventDto> getAllEvents(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize
+    ) {
+        return eventService.getAllEvents(pageNumber, pageSize);
     }
 
-    @GetMapping("/mine")
+    @GetMapping("/organizer")
     @Operation(summary = "Get the events created by the current organizer", description = "Retrieve a list of the events created by the authenticated organizer")
-    public List<EventDto> getAllEventsByOrganizer(Authentication connectedUser){
-        return eventService.getAllEventsByOrganizer(connectedUser.getName());
+    public PageResponse<EventDto> getAllEventsByOrganizer(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ){
+        return eventService.getAllEventsByOrganizer(pageNumber, pageSize, connectedUser.getName());
     }
 
     @GetMapping("/{id}")

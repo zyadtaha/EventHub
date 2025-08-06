@@ -1,5 +1,6 @@
 package com.eventhub.controller;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.OfferingDto;
 import com.eventhub.model.Offering;
 import com.eventhub.service.OfferingService;
@@ -25,14 +26,21 @@ public class OfferingController {
     @GetMapping()
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get all offerings", description = "Retrieve a list of all available offerings.")
-    public List<OfferingDto> getAllOfferings() {
-        return offeringService.getAllOfferings();
+    public PageResponse<OfferingDto> getAllOfferings(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize
+    ) {
+        return offeringService.getAllOfferings(pageNumber, pageSize);
     }
 
-    @GetMapping("/mine")
+    @GetMapping("/provider")
     @Operation(summary = "Get the offerings owned by the current provider", description = "Retrieve a list of all offerings managed by the authenticated offering provider.")
-    public List<OfferingDto> getAllOfferingsByProvider(Authentication connectedUser) {
-        return offeringService.getAllOfferingsByProvider(connectedUser.getName());
+    public PageResponse<OfferingDto> getAllOfferingsByProvider(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ) {
+        return offeringService.getAllOfferingsByProvider(pageNumber, pageSize, connectedUser.getName());
     }
 
     @GetMapping("/{id}")

@@ -1,5 +1,6 @@
 package com.eventhub.controller;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.eventregistration.RegistrationCreationDto;
 import com.eventhub.dto.eventregistration.RegistrationDto;
 import com.eventhub.dto.eventregistration.RegistrationUpdateDto;
@@ -27,22 +28,33 @@ public class EventRegistrationController {
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get all event registrations", description = "Retrieve a list of all event registrations.")
-    public List<RegistrationDto> getAllRegistrations() {
-        return registrationService.getAllRegistrations();
+    public PageResponse<RegistrationDto> getAllRegistrations(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize
+    ) {
+        return registrationService.getAllRegistrations(pageNumber, pageSize);
     }
 
     @GetMapping(params = "eventId")
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get the registrations of a specific event", description = "Retrieve a list of all registrations of an event organized by the authenticated organizer.")
-    public List<RegistrationDto> getAllRegistrationsByEvent(@RequestParam Long eventId, Authentication connectedUser) {
-        return registrationService.getAllRegistrationsByEvent(eventId, connectedUser.getName());
+    public PageResponse<RegistrationDto> getAllRegistrationsByEvent(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            @RequestParam Long eventId,
+            Authentication connectedUser) {
+        return registrationService.getAllRegistrationsByEvent(pageNumber, pageSize, eventId, connectedUser.getName());
     }
 
-    @GetMapping("/me")
+    @GetMapping("/attendee")
     @PreAuthorize("hasRole('ATTENDEE')")
     @Operation(summary = "Get the registrations made by the current attendee", description = "Retrieve a list of all registrations made by the authenticated attendee.")
-    public List<RegistrationDto> getAllRegistrationsByAttendee(Authentication connectedUser) {
-        return registrationService.getAllRegistrationsByAttendee(connectedUser.getName());
+    public PageResponse<RegistrationDto> getAllRegistrationsByAttendee(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ) {
+        return registrationService.getAllRegistrationsByAttendee(pageNumber, pageSize, connectedUser.getName());
     }
 
     @GetMapping("/{id}")

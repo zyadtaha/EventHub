@@ -1,11 +1,16 @@
 package com.eventhub.service;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.VenueDto;
 import com.eventhub.mapper.VenueMapper;
 import com.eventhub.model.Event.EventType;
 import com.eventhub.model.Venue;
 import com.eventhub.model.Venue.VenueType;
 import com.eventhub.repository.VenueRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -24,20 +29,42 @@ public class VenueService {
         this.venueMapper = venueMapper;
     }
 
-    public List<VenueDto> getAllVenues() {
-        return venueRepository
-                .findAll()
+    public PageResponse<VenueDto> getAllVenues(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Page<Venue> venues = venueRepository.findAll(pageable);
+        List<VenueDto> venueDtos = venues
                 .stream()
                 .map(venueMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                venueDtos,
+                venues.getNumber(),
+                venues.getSize(),
+                venues.getTotalElements(),
+                venues.getTotalPages(),
+                venues.isFirst(),
+                venues.isLast()
+        );
     }
 
-    public List<VenueDto> getAllVenuesByProvider(String providerId) {
-        return venueRepository
-                .findByProviderId(providerId)
+    public PageResponse<VenueDto> getAllVenuesByProvider(int pageNumber, int pageSize, String providerId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Page<Venue> venues = venueRepository.findByProviderId(providerId, pageable);
+        List<VenueDto> venueDtos = venues
                 .stream()
                 .map(venueMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                venueDtos,
+                venues.getNumber(),
+                venues.getSize(),
+                venues.getTotalElements(),
+                venues.getTotalPages(),
+                venues.isFirst(),
+                venues.isLast()
+        );
     }
 
     public VenueDto getVenueById(Long id, Authentication connectedUser) {
@@ -97,13 +124,24 @@ public class VenueService {
         return eligibilityMap.getOrDefault(venue.getType(), Set.of()).contains(eventType);
     }
 
-    public List<VenueDto> findEligibleVenues(EventType eventType) {
-        return venueRepository
-                .findAll()
+    public PageResponse<VenueDto> findAllEligibleVenues(int pageNumber, int pageSize, EventType eventType) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Page<Venue> venues = venueRepository.findAll(pageable);
+        List<VenueDto> venueDtos = venues
                 .stream()
                 .filter(v -> eligibilityMap.getOrDefault(v.getType(), Set.of()).contains(eventType))
                 .map(venueMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                venueDtos,
+                venues.getNumber(),
+                venues.getSize(),
+                venues.getTotalElements(),
+                venues.getTotalPages(),
+                venues.isFirst(),
+                venues.isLast()
+        );
     }
 
     public void addEligibleEventTypes(VenueType venueType, Set<EventType> eventsToAdd) {

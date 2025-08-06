@@ -1,10 +1,10 @@
 package com.eventhub.repository;
 
 import com.eventhub.model.Venue;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface VenueRepository extends JpaRepository<Venue, Long> {
-    List<Venue> findByProviderId(String providerId);
+    Page<Venue> findByProviderId(String providerId, Pageable pageable);
 }

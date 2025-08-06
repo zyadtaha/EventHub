@@ -1,5 +1,6 @@
 package com.eventhub.controller;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.VenueDto;
 import com.eventhub.model.Event.EventType;
 import com.eventhub.model.Venue;
@@ -10,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -27,14 +27,21 @@ public class VenueController {
     @GetMapping()
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get all venues", description = "Retrieve a list of all available venues.")
-    public List<VenueDto> getAllVenues(){
-        return venueService.getAllVenues();
+    public PageResponse<VenueDto> getAllVenues(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize
+    ){
+        return venueService.getAllVenues(pageNumber, pageSize);
     }
 
-    @GetMapping("/mine")
+    @GetMapping("/provider")
     @Operation(summary = "Get the venues owned by the current provider", description = "Retrieve a list of all venues managed by the authenticated venue provider.")
-    public List<VenueDto> getAllVenuesByProvider(Authentication connectedUser){
-        return venueService.getAllVenuesByProvider(connectedUser.getName());
+    public PageResponse<VenueDto> getAllVenuesByProvider(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ){
+        return venueService.getAllVenuesByProvider(pageNumber, pageSize, connectedUser.getName());
     }
 
     @GetMapping("/{id}")
@@ -47,8 +54,12 @@ public class VenueController {
     @GetMapping("/eligible")
     @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
     @Operation(summary = "Get eligible venues for an event type", description = "Retrieve a list of venues that are eligible for a specific event type.")
-    public List<VenueDto> getEligibleVenues(@RequestParam EventType eventType) {
-        return venueService.findEligibleVenues(eventType);
+    public PageResponse<VenueDto> getAllEligibleVenues(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize,
+            @RequestParam EventType eventType
+    ) {
+        return venueService.findAllEligibleVenues(pageNumber, pageSize, eventType);
     }
 
     @PostMapping()

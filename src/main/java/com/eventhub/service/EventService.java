@@ -1,11 +1,16 @@
 package com.eventhub.service;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.event.EventCreationDto;
 import com.eventhub.dto.event.EventDto;
 import com.eventhub.dto.event.EventUpdateDto;
 import com.eventhub.mapper.EventMapper;
 import com.eventhub.model.Event;
 import com.eventhub.repository.EventRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +27,42 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
-    public List<EventDto> getAllEvents() {
-        return eventRepository
-                .findAll()
+    public PageResponse<EventDto> getAllEvents(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDateTime").descending());
+        Page<Event> events = eventRepository.findAll(pageable);
+        List<EventDto> eventDtos = events
                 .stream()
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                eventDtos,
+                events.getNumber(),
+                events.getSize(),
+                events.getTotalElements(),
+                events.getTotalPages(),
+                events.isFirst(),
+                events.isLast()
+        );
     }
 
-    public List<EventDto> getAllEventsByOrganizer(String organizerId) {
-        return eventRepository
-                .findByOrganizerId(organizerId)
+    public PageResponse<EventDto> getAllEventsByOrganizer(int pageNumber, int pageSize, String organizerId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDateTime").descending());
+        Page<Event> events = eventRepository.findByOrganizerId(organizerId, pageable);
+        List<EventDto> eventDtos = events
                 .stream()
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                eventDtos,
+                events.getNumber(),
+                events.getSize(),
+                events.getTotalElements(),
+                events.getTotalPages(),
+                events.isFirst(),
+                events.isLast()
+        );
     }
 
     public EventDto getEventById(Long id, Authentication connectedUser) {

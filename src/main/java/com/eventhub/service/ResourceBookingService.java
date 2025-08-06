@@ -1,5 +1,6 @@
 package com.eventhub.service;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.resourcebooking.ResourceBookingCreationDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingUpdateDto;
@@ -7,6 +8,10 @@ import com.eventhub.mapper.ResourceBookingMapper;
 import com.eventhub.model.ResourceBooking;
 import com.eventhub.repository.ResourceBookingRepository;
 import com.stripe.exception.StripeException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -33,27 +38,61 @@ public class ResourceBookingService {
         this.venueService = venueService;
     }
 
-    public List<ResourceBookingDto> getAllBookings() {
-        return resourceBookingRepository
-                .findAll()
+    public PageResponse<ResourceBookingDto> getAllBookings(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
+        Page<ResourceBooking> bookings = resourceBookingRepository.findAll(pageable);
+        List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
                 .map(resourceBookingMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                bookingDtos,
+                bookings.getNumber(),
+                bookings.getSize(),
+                bookings.getTotalElements(),
+                bookings.getTotalPages(),
+                bookings.isFirst(),
+                bookings.isLast()
+        );
     }
 
-    public List<ResourceBookingDto> getBookingsByUserId(Authentication connectedUser) {
-        String userId = connectedUser.getName();
-        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER"))) {
-            return resourceBookingRepository.findByOrganizerId(userId)
-                    .stream()
-                    .map(resourceBookingMapper::toDto)
-                    .collect(Collectors.toList());
-        } else {
-            return resourceBookingRepository.findByProviderId(userId)
-                    .stream()
-                    .map(resourceBookingMapper::toDto)
-                    .collect(Collectors.toList());
-        }
+    public PageResponse<ResourceBookingDto> getBookingsByOrganizerId(int pageNumber, int pageSize, String organizerId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
+        Page<ResourceBooking> bookings = resourceBookingRepository.findByOrganizerId(organizerId, pageable);
+        List<ResourceBookingDto> bookingDtos = bookings
+                .stream()
+                .map(resourceBookingMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                bookingDtos,
+                bookings.getNumber(),
+                bookings.getSize(),
+                bookings.getTotalElements(),
+                bookings.getTotalPages(),
+                bookings.isFirst(),
+                bookings.isLast()
+        );
+    }
+
+    public PageResponse<ResourceBookingDto> getBookingsByProviderId(int pageNumber, int pageSize, String providerId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
+        Page<ResourceBooking> bookings = resourceBookingRepository.findByProviderId(providerId, pageable);
+        List<ResourceBookingDto> bookingDtos = bookings
+                .stream()
+                .map(resourceBookingMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                bookingDtos,
+                bookings.getNumber(),
+                bookings.getSize(),
+                bookings.getTotalElements(),
+                bookings.getTotalPages(),
+                bookings.isFirst(),
+                bookings.isLast()
+        );
     }
 
     public ResourceBookingDto getBookingById(Long id, Authentication connectedUser) {

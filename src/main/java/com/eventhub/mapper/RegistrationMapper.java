@@ -32,7 +32,7 @@ public class RegistrationMapper {
         registration.setAttendeeName(attendeeName);
         registration.setAttendeeEmail(attendeeEmail);
         registration.setOrganizerId(event.getOrganizerId());
-        registration.setStatus(EventRegistration.RegistrationStatus.CONFIRMED);
+        registration.setStatus(EventRegistration.RegistrationStatus.WAITLISTED);
         return registration;
     }
 

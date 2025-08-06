@@ -1,9 +1,14 @@
 package com.eventhub.service;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.OfferingDto;
 import com.eventhub.mapper.OfferingMapper;
 import com.eventhub.model.Offering;
 import com.eventhub.repository.OfferingRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -24,20 +29,42 @@ public class OfferingService {
         this.offeringMapper = offeringMapper;
     }
 
-    public List<OfferingDto> getAllOfferings() {
-        return offeringRepository
-                .findAll()
+    public PageResponse<OfferingDto> getAllOfferings(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("price").ascending());
+        Page<Offering> offerings = offeringRepository.findAll(pageable);
+        List<OfferingDto> offeringDtos = offerings
                 .stream()
                 .map(offeringMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                offeringDtos,
+                offerings.getNumber(),
+                offerings.getSize(),
+                offerings.getTotalElements(),
+                offerings.getTotalPages(),
+                offerings.isFirst(),
+                offerings.isLast()
+        );
     }
 
-    public List<OfferingDto> getAllOfferingsByProvider(String providerId) {
-        return offeringRepository
-                .findByProviderId(providerId)
+    public PageResponse<OfferingDto> getAllOfferingsByProvider(int pageNumber, int pageSize, String providerId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("price").ascending());
+        Page<Offering> offerings = offeringRepository.findByProviderId(providerId, pageable);
+        List<OfferingDto> offeringDtos = offerings
                 .stream()
                 .map(offeringMapper::toDto)
                 .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                offeringDtos,
+                offerings.getNumber(),
+                offerings.getSize(),
+                offerings.getTotalElements(),
+                offerings.getTotalPages(),
+                offerings.isFirst(),
+                offerings.isLast()
+        );
     }
 
     public OfferingDto getOfferingById(Long id, Authentication connectedUser) {

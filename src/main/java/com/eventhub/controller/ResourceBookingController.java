@@ -1,5 +1,6 @@
 package com.eventhub.controller;
 
+import com.eventhub.common.PageResponse;
 import com.eventhub.dto.resourcebooking.ResourceBookingCreationDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingUpdateDto;
@@ -10,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -26,15 +25,33 @@ public class ResourceBookingController {
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get all resource bookings", description = "Retrieve a list of all resource bookings.")
-    public List<ResourceBookingDto> getAllBookings() {
-        return resourceBookingService.getAllBookings();
+    public PageResponse<ResourceBookingDto> getAllBookings(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "20", required = false) int pageSize
+    ) {
+        return resourceBookingService.getAllBookings(pageNumber, pageSize);
     }
 
-    @GetMapping("/mine")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
-    @Operation(summary = "Get bookings for the current user", description = "Retrieve bookings filtered by the authenticated user's role.")
-    public List<ResourceBookingDto> getBookingsByUserId(Authentication connectedUser) {
-        return resourceBookingService.getBookingsByUserId(connectedUser);
+    @GetMapping("/orgnaizer")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @Operation(summary = "Get bookings for the current organizer", description = "Retrieve bookings filtered by the authenticated organizer.")
+    public PageResponse<ResourceBookingDto> getBookingsByOrganizerId(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ) {
+        return resourceBookingService.getBookingsByOrganizerId(pageNumber, pageSize, connectedUser.getName());
+    }
+
+    @GetMapping("/provider")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @Operation(summary = "Get bookings for the current provider", description = "Retrieve bookings filtered by the authenticated provider.")
+    public PageResponse<ResourceBookingDto> getBookingsByProviderId(
+            @RequestParam(defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            Authentication connectedUser
+    ) {
+        return resourceBookingService.getBookingsByProviderId(pageNumber, pageSize, connectedUser.getName());
     }
 
     @GetMapping("/{id}")

@@ -45,6 +45,22 @@ public class Event {
         CONFERENCE, WORKSHOP, SEMINAR
     }
 
+    @Override
+    public String toString(){
+        return "Event{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", organizerId='" + organizerId + '\'' +
+                ", retailPrice=" + retailPrice +
+                ", startDateTime=" + startDateTime +
+                ", endDateTime=" + endDateTime +
+                ", creationTime=" + creationTime +
+                ", cancellationTime=" + cancellationTime +
+                ", isCancelled=" + isCancelled +
+                ", type=" + type +
+                '}';
+    }
+
     public boolean canCancelWithoutPenalty() {
         LocalDateTime freeCancellationDeadline = creationTime.plusHours(48);
         return LocalDateTime.now().isBefore(freeCancellationDeadline);

@@ -26,6 +26,7 @@ public class EventRegistration {
     @Column(nullable = false, updatable = false)
     private String organizerId;
 
+    // TODO: Is this correct?
     private LocalDateTime registrationDate = LocalDateTime.now();
     private LocalDateTime cancellationTime;
     private boolean isCancelled;
