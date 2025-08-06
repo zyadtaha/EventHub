@@ -1,6 +1,6 @@
 spring:
   application:
-    name: event-management-system
+    name: EventHub
   profiles:
     active: dev
   datasource:

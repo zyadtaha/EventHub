@@ -8,11 +8,10 @@
         <version>3.5.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.eventsystem</groupId>
-    <artifactId>eventsystem</artifactId>
+    <groupId>com.eventhub</groupId>
+    <artifactId>eventhub</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>event-management-system</name>
-    <description>event-management-system</description>
+    <name>EventHub</name>
     <url/>
     <licenses>
         <license/>
