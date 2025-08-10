@@ -3,10 +3,12 @@ package com.eventhub;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableJpaAuditing(auditorAwareRef = "applicationAuditAware")
 public class EventHubApplication {
     static {
         Dotenv dotenv = Dotenv.configure()
