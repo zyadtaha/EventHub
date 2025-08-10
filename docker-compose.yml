@@ -3,12 +3,12 @@ services:
     container_name: eventhub-postgres
     image: postgres:latest
     environment:
-      POSTGRES_DB: eventsystem
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /data/postgres
     volumes:
       - eventhub_pg_data:/data/postgres
+      - ./init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql
     ports:
       - "5332:5432"
     networks:
@@ -19,13 +19,12 @@ services:
     container_name: eventhub-keycloak
     image: quay.io/keycloak/keycloak:latest
     environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: eventhub-db
-      DB_DATABASE: eventsystem
-      DB_USER: root
-      DB_PASSWORD: password
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://eventhub-db:5432/keycloak_db
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     volumes:
       - eventhub_kc_data:/opt/keycloak/data
     ports:
@@ -39,18 +38,14 @@ services:
       - "start-dev"
 
   eventhub-app:
+    image: zyadtaha/eventhub
     container_name: eventhub-app
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://eventhub-db:5432/eventsystem
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://eventhub-auth:8080/realms/EventHub
-      SPRING_MAIL_USERNAME: ${EMAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${EMAIL_PASSWORD}
-      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://eventhub-db:5432/eventhub_prod
     ports:
       - "8080:8080"
     depends_on:
@@ -59,6 +54,8 @@ services:
     networks:
       - eventhub-network
     restart: unless-stopped
+    env_file:
+      - .env
 
 networks:
   eventhub-network:
