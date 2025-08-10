@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5332/eventhub_test
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true

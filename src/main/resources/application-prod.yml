@@ -1,0 +1,3 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5332/eventhub_prod
