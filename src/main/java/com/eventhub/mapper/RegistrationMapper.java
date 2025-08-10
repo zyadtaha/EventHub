@@ -31,7 +31,7 @@ public class RegistrationMapper {
         registration.setAttendeeId(attendeeId);
         registration.setAttendeeName(attendeeName);
         registration.setAttendeeEmail(attendeeEmail);
-        registration.setOrganizerId(event.getOrganizerId());
+        registration.setOrganizerId(event.getCreatedBy());
         registration.setStatus(EventRegistration.RegistrationStatus.WAITLISTED);
         return registration;
     }

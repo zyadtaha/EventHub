@@ -31,7 +31,7 @@ public class EventMapper {
                         .toList(),
                 event.getRetailPrice(),
                 event.getType(),
-                event.getCreationTime(),
+                event.getCreatedAt(),
                 event.canCancelWithoutPenalty(),
                 event.calculateCancellationPenalty(),
                 event.isCancelled(),
@@ -39,23 +39,21 @@ public class EventMapper {
         );
     }
 
-    public Event toEntity(EventCreationDto eventCreationDto, String organizerId) {
+    public Event toEntity(EventCreationDto eventCreationDto) {
         Event event = new Event();
         event.setName(eventCreationDto.getName());
         event.setStartDateTime(eventCreationDto.getStartDateTime());
         event.setEndDateTime(eventCreationDto.getEndDateTime());
         event.setRetailPrice(eventCreationDto.getRetailPrice());
-        event.setOrganizerId(organizerId);
         event.setType(eventCreationDto.getType());
         return event;
     }
 
-    public Event updateFromDtoToEntity(EventUpdateDto eventUpdateDto, Event event, String organizerId){
+    public Event updateFromDtoToEntity(EventUpdateDto eventUpdateDto, Event event){
         event.setName(eventUpdateDto.getName());
         event.setStartDateTime(eventUpdateDto.getStartDateTime());
         event.setEndDateTime(eventUpdateDto.getEndDateTime());
         event.setRetailPrice(eventUpdateDto.getRetailPrice());
-        event.setOrganizerId(organizerId);
         List<ResourceBooking> resourceBookings = resourceBookingRepository.findAllById(eventUpdateDto.getBookingIds());
         event.getResourceBookings().clear();
         event.getResourceBookings().addAll(resourceBookings);

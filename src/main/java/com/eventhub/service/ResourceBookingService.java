@@ -108,7 +108,7 @@ public class ResourceBookingService {
     public ResourceBookingDto createBooking(ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) throws StripeException {
         String organizerId = connectedUser.getName();
         ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto, organizerId);
-        if(!resourceBooking.getEvent().getOrganizerId().equals(organizerId)){
+        if(!resourceBooking.getEvent().getCreatedBy().equals(organizerId)){
             throw new IllegalArgumentException("You are not authorized to create a booking to this event");
         }
         if (resourceBooking.getVenue() != null && !venueService.isVenueSuitableForEventType(resourceBooking.getVenue().getId(), resourceBooking.getEvent().getType())) {

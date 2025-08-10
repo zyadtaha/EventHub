@@ -61,7 +61,7 @@ public class EventRegistrationService {
 
     public PageResponse<RegistrationDto> getAllRegistrationsByEvent(int pageNumber, int pageSize, Long eventId, String organizerId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
-        if(!event.getOrganizerId().equals(organizerId)) {
+        if(!event.getCreatedBy().equals(organizerId)) {
             throw new IllegalArgumentException("You are not authorized to view registrations for this event");
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
