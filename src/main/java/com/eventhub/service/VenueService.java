@@ -50,7 +50,7 @@ public class VenueService {
 
     public PageResponse<VenueDto> getAllVenuesByProvider(int pageNumber, int pageSize, String providerId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
-        Page<Venue> venues = venueRepository.findByProviderId(providerId, pageable);
+        Page<Venue> venues = venueRepository.findByCreatedBy(providerId, pageable);
         List<VenueDto> venueDtos = venues
                 .stream()
                 .map(venueMapper::toDto)
@@ -70,7 +70,7 @@ public class VenueService {
     public VenueDto getVenueById(Long id, Authentication connectedUser) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
         if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
-                venue.getProviderId().equals(connectedUser.getName())) {
+                venue.getCreatedBy().equals(connectedUser.getName())) {
             return venueMapper.toDto(venue);
         } else {
             throw new IllegalArgumentException("You are not authorized to view this venue");
@@ -81,15 +81,14 @@ public class VenueService {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
         String providerEmail = jwt.getClaimAsString("email");
-        String providerId = connectedUser.getName();
-        Venue venue = venueMapper.toEntity(venueDto, providerId, providerEmail);
+        Venue venue = venueMapper.toEntity(venueDto, providerEmail);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
     }
 
     public VenueDto updateVenue(Long id, VenueDto newVenueDto, String providerId) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
-        if(!venue.getProviderId().equals(providerId)){
+        if(!venue.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to update this venue");
         }
         venue.setName(newVenueDto.getName());
@@ -99,14 +98,13 @@ public class VenueService {
         venue.setMinCapacity(newVenueDto.getMinCapacity());
         venue.setMaxCapacity(newVenueDto.getMaxCapacity());
         venue.setPricePerHour(newVenueDto.getPricePerHour());
-        venue.setProviderId(providerId);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
     }
 
     public void deleteVenue(Long id, String providerId) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
-        if(!venue.getProviderId().equals(providerId)){
+        if(!venue.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to delete this venue");
         }
         venueRepository.delete(venue);

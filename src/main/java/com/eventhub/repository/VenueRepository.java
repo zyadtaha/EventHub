@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VenueRepository extends JpaRepository<Venue, Long> {
-    Page<Venue> findByProviderId(String providerId, Pageable pageable);
+    Page<Venue> findByCreatedBy(String createdBy, Pageable pageable);
 }

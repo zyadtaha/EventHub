@@ -46,7 +46,7 @@ public class ResourceBookingMapper {
             Venue venue = venueRepository.findById(resourceBookingCreationDto.getVenueId())
                     .orElseThrow(() -> new IllegalArgumentException("Venue not found with id: " + resourceBookingCreationDto.getVenueId()));
             resourceBooking.setVenue(venue);
-            resourceBooking.setProviderId(venue.getProviderId());
+            resourceBooking.setProviderId(venue.getCreatedBy());
         }
         if(resourceBookingCreationDto.getOfferingId() == null) {
             resourceBooking.setOffering(null);

@@ -181,7 +181,7 @@ public class ResourceBookingService {
     private boolean isUserAuthorized(ResourceBooking resourceBooking, Authentication connectedUser) {
         String userId = connectedUser.getName();
         return resourceBooking.getOrganizerId().equals(userId) ||
-                (resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(userId)) ||
+                (resourceBooking.getVenue() != null && resourceBooking.getVenue().getCreatedBy().equals(userId)) ||
                 (resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(userId));
     }
 }
