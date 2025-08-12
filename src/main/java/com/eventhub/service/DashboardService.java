@@ -54,7 +54,7 @@ public class DashboardService {
         for (int i = days - 1; i >= 0; i--) {
             LocalDate day = today.minusDays(i);
             int bookings = (int) registrations.stream()
-                    .filter(r -> r.getRegistrationDate().toLocalDate().equals(day))
+                    .filter(r -> r.getCreatedAt().toLocalDate().equals(day))
                     .count();
             int cancellations = (int) registrations.stream()
                     .filter(r -> r.getCancellationTime() != null && r.getCancellationTime().toLocalDate().equals(day))
