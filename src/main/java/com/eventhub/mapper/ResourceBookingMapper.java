@@ -27,7 +27,7 @@ public class ResourceBookingMapper {
                 resourceBooking.getEvent().getId(),
                 resourceBooking.getVenue() == null ? null : venueMapper.toDto(resourceBooking.getVenue()),
                 resourceBooking.getOffering() == null ? null : offeringMapper.toDto(resourceBooking.getOffering()),
-                resourceBooking.getBookingTime(),
+                resourceBooking.getCreatedAt(),
                 resourceBooking.getTotalPrice(),
                 resourceBooking.getCancellationTime(),
                 resourceBooking.getStatus(),
@@ -35,7 +35,7 @@ public class ResourceBookingMapper {
         );
     }
 
-    public ResourceBooking toEntity(ResourceBookingCreationDto resourceBookingCreationDto, String organizerId) {
+    public ResourceBooking toEntity(ResourceBookingCreationDto resourceBookingCreationDto) {
         Event event = eventRepository.findById(resourceBookingCreationDto.getEventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found with id: " + resourceBookingCreationDto.getEventId()));
         ResourceBooking resourceBooking = new ResourceBooking();
@@ -56,11 +56,9 @@ public class ResourceBookingMapper {
             resourceBooking.setOffering(offering);
             resourceBooking.setProviderId(offering.getCreatedBy());
         }
-        resourceBooking.setBookingTime(resourceBookingCreationDto.getBookingTime());
         resourceBooking.setTotalPrice(resourceBookingCreationDto.getTotalPrice());
         resourceBooking.setStatus(ResourceBooking.Status.PENDING);
         resourceBooking.setCancelled(false);
-        resourceBooking.setOrganizerId(organizerId);
         return resourceBooking;
     }
 
