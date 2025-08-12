@@ -17,16 +17,15 @@ public class OfferingMapper {
         );
     }
 
-    public Offering toEntity(OfferingDto offeringDto, String providerId, String providerEmail) {
-        return new Offering(
-                offeringDto.getName(),
-                offeringDto.getPrice(),
-                offeringDto.getType(),
-                offeringDto.getOptions(),
-                offeringDto.getOfferingAreas(),
-                offeringDto.getAvailabilitySlots(),
-                providerId,
-                providerEmail
-        );
+    public Offering toEntity(OfferingDto offeringDto, String providerEmail) {
+        Offering offering = new Offering();
+        offering.setName(offeringDto.getName());
+        offering.setPrice(offeringDto.getPrice());
+        offering.setType(offeringDto.getType());
+        offering.setOptions(offeringDto.getOptions());
+        offering.setOfferingAreas(offeringDto.getOfferingAreas());
+        offering.setAvailabilitySlots(offeringDto.getAvailabilitySlots());
+        offering.setProviderEmail(providerEmail);
+        return offering;
     }
 }

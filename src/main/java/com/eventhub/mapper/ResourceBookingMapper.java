@@ -54,7 +54,7 @@ public class ResourceBookingMapper {
             Offering offering = offeringRepository.findById(resourceBookingCreationDto.getOfferingId())
                     .orElseThrow(() -> new IllegalArgumentException("Offering not found with id: " + resourceBookingCreationDto.getOfferingId()));
             resourceBooking.setOffering(offering);
-            resourceBooking.setProviderId(offering.getProviderId());
+            resourceBooking.setProviderId(offering.getCreatedBy());
         }
         resourceBooking.setBookingTime(resourceBookingCreationDto.getBookingTime());
         resourceBooking.setTotalPrice(resourceBookingCreationDto.getTotalPrice());

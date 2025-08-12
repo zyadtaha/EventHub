@@ -182,7 +182,7 @@ public class ResourceBookingService {
         String userId = connectedUser.getName();
         return resourceBooking.getOrganizerId().equals(userId) ||
                 (resourceBooking.getVenue() != null && resourceBooking.getVenue().getCreatedBy().equals(userId)) ||
-                (resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(userId));
+                (resourceBooking.getOffering() != null && resourceBooking.getOffering().getCreatedBy().equals(userId));
     }
 }
 

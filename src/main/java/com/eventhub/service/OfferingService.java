@@ -50,7 +50,7 @@ public class OfferingService {
 
     public PageResponse<OfferingDto> getAllOfferingsByProvider(int pageNumber, int pageSize, String providerId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("price").ascending());
-        Page<Offering> offerings = offeringRepository.findByProviderId(providerId, pageable);
+        Page<Offering> offerings = offeringRepository.findByCreatedBy(providerId, pageable);
         List<OfferingDto> offeringDtos = offerings
                 .stream()
                 .map(offeringMapper::toDto)
@@ -70,7 +70,7 @@ public class OfferingService {
     public OfferingDto getOfferingById(Long id, Authentication connectedUser) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
         if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
-                offering.getProviderId().equals(connectedUser.getName())) {
+                offering.getCreatedBy().equals(connectedUser.getName())) {
             return offeringMapper.toDto(offering);
         } else {
             throw new IllegalArgumentException("You are not authorized to view this offering");
@@ -81,15 +81,14 @@ public class OfferingService {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
         String providerEmail = jwt.getClaimAsString("email");
-        String providerId = connectedUser.getName();
-        Offering offering = offeringMapper.toEntity(offeringDto, providerId, providerEmail);
+        Offering offering = offeringMapper.toEntity(offeringDto, providerEmail);
         Offering o = offeringRepository.save(offering);
         return offeringMapper.toDto(o);
     }
 
     public OfferingDto updateOffering(Long id, OfferingDto newOfferingDto, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
-        if(!offering.getProviderId().equals(providerId)){
+        if(!offering.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to update this offering");
         }
         offering.setName(newOfferingDto.getName());
@@ -98,14 +97,13 @@ public class OfferingService {
         offering.setOptions(newOfferingDto.getOptions());
         offering.setOfferingAreas(newOfferingDto.getOfferingAreas());
         offering.setAvailabilitySlots(newOfferingDto.getAvailabilitySlots());
-        offering.setProviderId(providerId);
         offeringRepository.save(offering);
         return offeringMapper.toDto(offering);
     }
 
     public void deleteOffering(Long id, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
-        if(!offering.getProviderId().equals(providerId)){
+        if(!offering.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to delete this offering");
         }
         offeringRepository.delete(offering);
@@ -118,7 +116,7 @@ public class OfferingService {
 
     public OfferingDto addOption(Long id, Offering.Option option, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
-        if(!offering.getProviderId().equals(providerId)){
+        if(!offering.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to add an option to this offering");
         }
         offering.addOption(option);
@@ -133,7 +131,7 @@ public class OfferingService {
 
     public OfferingDto addAvailabilitySlot(Long id, LocalDateTime startTime, LocalDateTime endTime, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
-        if(!offering.getProviderId().equals(providerId)){
+        if(!offering.getCreatedBy().equals(providerId)){
             throw new IllegalArgumentException("You are not authorized to add an availability slot to this offering");
         }
         offering.addAvailabilitySlot(new Offering.AvailabilitySlot(startTime, endTime));
