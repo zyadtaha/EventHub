@@ -1,41 +1,31 @@
 package com.eventhub.model;
 
+import com.eventhub.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "events")
-public class Event {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Event extends BaseEntity {
+    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false, updatable = false)
-    private String organizerId;
-
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ResourceBooking> resourceBookings = new ArrayList<>();
-
     @Column(nullable = false)
     private Integer retailPrice;
-
     @Column(nullable = false)
     private LocalDateTime startDateTime;
     @Column(nullable = false)
     private LocalDateTime endDateTime;
-
-    private LocalDateTime creationTime = LocalDateTime.now();
-    private LocalDateTime cancellationTime;
-    private boolean isCancelled = false;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EventType type;
@@ -45,16 +35,22 @@ public class Event {
         CONFERENCE, WORKSHOP, SEMINAR
     }
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ResourceBooking> resourceBookings = new ArrayList<>();
+
+    private LocalDateTime cancellationTime;
+    private boolean isCancelled;
+
     @Override
     public String toString(){
         return "Event{" +
-                "id=" + id +
+                "id=" + super.getId() +
                 ", name='" + name + '\'' +
-                ", organizerId='" + organizerId + '\'' +
+                ", organizerId='" + super.getCreatedBy() + '\'' +
                 ", retailPrice=" + retailPrice +
                 ", startDateTime=" + startDateTime +
                 ", endDateTime=" + endDateTime +
-                ", creationTime=" + creationTime +
+                ", creationTime=" + super.getCreatedAt() +
                 ", cancellationTime=" + cancellationTime +
                 ", isCancelled=" + isCancelled +
                 ", type=" + type +
@@ -62,7 +58,7 @@ public class Event {
     }
 
     public boolean canCancelWithoutPenalty() {
-        LocalDateTime freeCancellationDeadline = creationTime.plusHours(48);
+        LocalDateTime freeCancellationDeadline = super.getCreatedAt().plusHours(48);
         return LocalDateTime.now().isBefore(freeCancellationDeadline);
     }
 

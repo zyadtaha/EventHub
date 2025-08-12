@@ -51,8 +51,8 @@ public class EventController {
 
     @PostMapping()
     @Operation(summary = "Create a new event", description = "Create a new event managed by the authenticated organizer")
-    public EventDto createEvent(@RequestBody EventCreationDto eventDto, Authentication connectedUser){
-        return eventService.createEvent(eventDto, connectedUser.getName());
+    public EventDto createEvent(@RequestBody EventCreationDto eventDto){
+        return eventService.createEvent(eventDto);
     }
 
     @PostMapping("/{id}/cancel")

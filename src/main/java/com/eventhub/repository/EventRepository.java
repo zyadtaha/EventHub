@@ -6,5 +6,4 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    Page<Event> findByOrganizerId(String organizerId, Pageable pageable);
-}
+    Page<Event> findByCreatedBy(String createdBy, Pageable pageable);}

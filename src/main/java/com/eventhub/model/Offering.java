@@ -1,8 +1,11 @@
 package com.eventhub.model;
 
+import com.eventhub.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,25 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "offerings")
-public class Offering {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Offering extends BaseEntity {
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private Integer price;
+    @Column(nullable = false)
     private String providerEmail;
 
-    @Column(nullable = false, updatable = false)
-    private String providerId;
-
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OfferingType type;
 
-    // TODO: Should it be added to the constructor? (also check venue class)
     // TODO: Should it be initialized with empty list?
     @OneToMany(mappedBy = "offering", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <ResourceBooking> resourceBookings;
@@ -45,24 +46,6 @@ public class Offering {
     @ElementCollection
     @CollectionTable(name = "offering_availability_slots", joinColumns = @JoinColumn(name = "offering_id"))
     private List<AvailabilitySlot> availabilitySlots;
-
-    public Offering(String name,
-                    Integer price,
-                    OfferingType type,
-                    List<Option> options,
-                    List<String> offeringAreas,
-                    List<AvailabilitySlot> availabilitySlots,
-                    String providerId,
-                    String providerEmail) {
-        this.name = name;
-        this.price = price;
-        this.type = type;
-        this.options = options;
-        this.offeringAreas = offeringAreas;
-        this.availabilitySlots = availabilitySlots;
-        this.providerId = providerId;
-        this.providerEmail = providerEmail;
-    }
 
     public enum OfferingType {
         CATERING, DECORATION, AUDIO_VISUAL_EQUIPMENT,

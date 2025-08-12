@@ -39,7 +39,7 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getAllBookings(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<ResourceBooking> bookings = resourceBookingRepository.findAll(pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
@@ -58,8 +58,8 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getBookingsByOrganizerId(int pageNumber, int pageSize, String organizerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
-        Page<ResourceBooking> bookings = resourceBookingRepository.findByOrganizerId(organizerId, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Page<ResourceBooking> bookings = resourceBookingRepository.findByCreatedBy(organizerId, pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
                 .map(resourceBookingMapper::toDto)
@@ -77,7 +77,7 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getBookingsByProviderId(int pageNumber, int pageSize, String providerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("bookingTime").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<ResourceBooking> bookings = resourceBookingRepository.findByProviderId(providerId, pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
@@ -107,8 +107,8 @@ public class ResourceBookingService {
     @Transactional
     public ResourceBookingDto createBooking(ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) throws StripeException {
         String organizerId = connectedUser.getName();
-        ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto, organizerId);
-        if(!resourceBooking.getEvent().getOrganizerId().equals(organizerId)){
+        ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto);
+        if(!resourceBooking.getEvent().getCreatedBy().equals(organizerId)){
             throw new IllegalArgumentException("You are not authorized to create a booking to this event");
         }
         if (resourceBooking.getVenue() != null && !venueService.isVenueSuitableForEventType(resourceBooking.getVenue().getId(), resourceBooking.getEvent().getType())) {
@@ -170,7 +170,7 @@ public class ResourceBookingService {
         String organizerId = connectedUser.getName();
 
         ResourceBooking resourceBooking = resourceBookingRepository.findById(bookingId).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
-        if (!resourceBooking.getOrganizerId().equals(organizerId)) {
+        if (!resourceBooking.getCreatedBy().equals(organizerId)) {
             throw new IllegalArgumentException("You are not authorized to pay for this booking");
         }
         resourceBooking.setStatus(ResourceBooking.Status.CONFIRMED);
@@ -180,9 +180,9 @@ public class ResourceBookingService {
 
     private boolean isUserAuthorized(ResourceBooking resourceBooking, Authentication connectedUser) {
         String userId = connectedUser.getName();
-        return resourceBooking.getOrganizerId().equals(userId) ||
-                (resourceBooking.getVenue() != null && resourceBooking.getVenue().getProviderId().equals(userId)) ||
-                (resourceBooking.getOffering() != null && resourceBooking.getOffering().getProviderId().equals(userId));
+        return resourceBooking.getCreatedBy().equals(userId) ||
+                (resourceBooking.getVenue() != null && resourceBooking.getVenue().getCreatedBy().equals(userId)) ||
+                (resourceBooking.getOffering() != null && resourceBooking.getOffering().getCreatedBy().equals(userId));
     }
 }
 

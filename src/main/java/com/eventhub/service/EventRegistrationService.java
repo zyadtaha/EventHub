@@ -41,7 +41,7 @@ public class EventRegistrationService {
     }
 
     public PageResponse<RegistrationDto> getAllRegistrations(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<EventRegistration> registrations = registrationRepository.findAll(pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
@@ -61,10 +61,10 @@ public class EventRegistrationService {
 
     public PageResponse<RegistrationDto> getAllRegistrationsByEvent(int pageNumber, int pageSize, Long eventId, String organizerId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
-        if(!event.getOrganizerId().equals(organizerId)) {
+        if(!event.getCreatedBy().equals(organizerId)) {
             throw new IllegalArgumentException("You are not authorized to view registrations for this event");
         }
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<EventRegistration> registrations = registrationRepository.findByEventId(eventId, pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
@@ -83,8 +83,8 @@ public class EventRegistrationService {
     }
 
     public PageResponse<RegistrationDto> getAllRegistrationsByAttendee(int pageNumber, int pageSize, String attendeeId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registrationDate").descending());
-        Page<EventRegistration> registrations = registrationRepository.findByAttendeeId(attendeeId, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Page<EventRegistration> registrations = registrationRepository.findByCreatedBy(attendeeId, pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
                 .map(registrationMapper::toDto)
@@ -103,7 +103,7 @@ public class EventRegistrationService {
 
     public RegistrationDto getRegistrationById(Long id, String userId) {
         EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
-        if (!registration.getAttendeeId().equals(userId) && !registration.getOrganizerId().equals(userId)) {
+        if (!registration.getCreatedBy().equals(userId) && !registration.getOrganizerId().equals(userId)) {
             throw new IllegalArgumentException("You are not authorized to view this registration");
         }
         return registrationMapper.toDto(registration);
@@ -115,9 +115,8 @@ public class EventRegistrationService {
         Jwt jwt = jwtToken.getToken();
         String attendeeName = jwt.getClaimAsString("preferred_username");
         String attendeeEmail = jwt.getClaimAsString("email");
-        String attendeeId = connectedUser.getName();
 
-        EventRegistration registration = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeId, attendeeEmail);
+        EventRegistration registration = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeEmail);
         registrationRepository.save(registration);
 
         Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
@@ -135,7 +134,7 @@ public class EventRegistrationService {
 
     public RegistrationDto updateRegistration(Long id, RegistrationUpdateDto registrationUpdateDto, String attendeeId) {
         EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
-        if (!registration.getAttendeeId().equals(attendeeId)) {
+        if (!registration.getCreatedBy().equals(attendeeId)) {
             throw new IllegalArgumentException("You are not authorized to update this registration");
         }
         registration = registrationMapper.updateEntityFromDto(registrationUpdateDto, registration);
@@ -149,7 +148,7 @@ public class EventRegistrationService {
 
     public RegistrationDto cancelRegistration(Long id, String attendeeId) {
         EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
-        if (!registration.getAttendeeId().equals(attendeeId)) {
+        if (!registration.getCreatedBy().equals(attendeeId)) {
             throw new IllegalArgumentException("You are not authorized to cancel this registration");
         }
         registration.setCancelled(true);
@@ -165,7 +164,7 @@ public class EventRegistrationService {
     @Transactional
     public void confirmPayment(Long registrationId, String attendeeId) {
         EventRegistration registration = registrationRepository.findById(registrationId).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
-        if (!registration.getAttendeeId().equals(attendeeId)) {
+        if (!registration.getCreatedBy().equals(attendeeId)) {
             throw new IllegalArgumentException("You are not authorized to pay for this registration");
         }
         registration.setStatus(EventRegistration.RegistrationStatus.CONFIRMED);

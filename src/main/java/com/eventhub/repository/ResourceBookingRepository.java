@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ResourceBookingRepository extends JpaRepository<ResourceBooking, Long> {
-    Page<ResourceBooking> findByOrganizerId(String organizerId, Pageable pageable);
+    Page<ResourceBooking> findByCreatedBy(String createdBy, Pageable pageable);
     Page<ResourceBooking> findByProviderId(String providerId, Pageable pageable);
 }

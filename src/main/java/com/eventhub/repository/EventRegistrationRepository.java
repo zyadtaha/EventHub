@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface EventRegistrationRepository extends JpaRepository<EventRegistration, Long> {
     Page<EventRegistration> findByEventId(Long eventId, Pageable pageable);
-    Page<EventRegistration> findByAttendeeId(String attendeeId, Pageable pageable);
+    Page<EventRegistration> findByCreatedBy(String createdBy, Pageable pageable);
 }

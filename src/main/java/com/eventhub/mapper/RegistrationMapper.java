@@ -24,14 +24,13 @@ public class RegistrationMapper {
         );
     }
 
-    public EventRegistration toEntity(RegistrationCreationDto registrationCreationDto, String attendeeName, String attendeeId, String attendeeEmail) {
+    public EventRegistration toEntity(RegistrationCreationDto registrationCreationDto, String attendeeName, String attendeeEmail) {
         Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
         EventRegistration registration = new EventRegistration();
         registration.setEventId(event.getId());
-        registration.setAttendeeId(attendeeId);
         registration.setAttendeeName(attendeeName);
         registration.setAttendeeEmail(attendeeEmail);
-        registration.setOrganizerId(event.getOrganizerId());
+        registration.setOrganizerId(event.getCreatedBy());
         registration.setStatus(EventRegistration.RegistrationStatus.WAITLISTED);
         return registration;
     }
