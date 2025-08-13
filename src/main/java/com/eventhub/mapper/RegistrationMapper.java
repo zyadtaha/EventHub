@@ -3,6 +3,8 @@ package com.eventhub.mapper;
 import com.eventhub.dto.eventregistration.RegistrationCreationDto;
 import com.eventhub.dto.eventregistration.RegistrationDto;
 import com.eventhub.dto.eventregistration.RegistrationUpdateDto;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.model.Event;
 import com.eventhub.model.EventRegistration;
 import com.eventhub.repository.EventRepository;
@@ -15,7 +17,7 @@ public class RegistrationMapper {
     private final EventRepository eventRepository;
 
     public RegistrationDto toDto(EventRegistration eventRegistration) {
-        Event e = eventRepository.findById(eventRegistration.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event e = eventRepository.findById(eventRegistration.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         return new RegistrationDto(
                 e.getName(),
                 eventRegistration.getAttendeeName(),
@@ -25,7 +27,7 @@ public class RegistrationMapper {
     }
 
     public EventRegistration toEntity(RegistrationCreationDto registrationCreationDto, String attendeeName, String attendeeEmail) {
-        Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         EventRegistration registration = new EventRegistration();
         registration.setEventId(event.getId());
         registration.setAttendeeName(attendeeName);
