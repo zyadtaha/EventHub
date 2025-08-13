@@ -2,6 +2,10 @@ package com.eventhub.service;
 
 import com.eventhub.common.PageResponse;
 import com.eventhub.dto.OfferingDto;
+import com.eventhub.exception.NotAuthorizedException;
+import com.eventhub.exception.NotAuthorizedException.*;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.mapper.OfferingMapper;
 import com.eventhub.model.Offering;
 import com.eventhub.repository.OfferingRepository;
@@ -17,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @Service
 public class OfferingService {
@@ -68,12 +71,12 @@ public class OfferingService {
     }
 
     public OfferingDto getOfferingById(Long id, Authentication connectedUser) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
                 offering.getCreatedBy().equals(connectedUser.getName())) {
             return offeringMapper.toDto(offering);
         } else {
-            throw new IllegalArgumentException("You are not authorized to view this offering");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.OFFERING, id);
         }
     }
 
@@ -87,9 +90,9 @@ public class OfferingService {
     }
 
     public OfferingDto updateOffering(Long id, OfferingDto newOfferingDto, String providerId) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to update this offering");
+            throw new NotAuthorizedException(Action.UPDATE, ResourceType.OFFERING, id);
         }
         offering.setName(newOfferingDto.getName());
         offering.setPrice(newOfferingDto.getPrice());
@@ -102,22 +105,22 @@ public class OfferingService {
     }
 
     public void deleteOffering(Long id, String providerId) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to delete this offering");
+            throw new NotAuthorizedException(Action.DELETE, ResourceType.OFFERING, id);
         }
         offeringRepository.delete(offering);
     }
 
     public List<Offering.Option> getAllOptions(Long id) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         return offering.getOptions();
     }
 
     public OfferingDto addOption(Long id, Offering.Option option, String providerId) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to add an option to this offering");
+            throw new NotAuthorizedException("You are not authorized to add an option to this offering");
         }
         offering.addOption(option);
         offeringRepository.save(offering);
@@ -125,14 +128,14 @@ public class OfferingService {
     }
 
     public List<Offering.AvailabilitySlot> getAllAvailabilitySlot(Long id) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         return offering.getAvailabilitySlots();
     }
 
     public OfferingDto addAvailabilitySlot(Long id, LocalDateTime startTime, LocalDateTime endTime, String providerId) {
-        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Offering not found"));
+        Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to add an availability slot to this offering");
+            throw new NotAuthorizedException("You are not authorized to add an availability slot to this offering");
         }
         offering.addAvailabilitySlot(new Offering.AvailabilitySlot(startTime, endTime));
         offeringRepository.save(offering);

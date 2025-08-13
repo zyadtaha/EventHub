@@ -4,6 +4,10 @@ import com.eventhub.common.PageResponse;
 import com.eventhub.dto.resourcebooking.ResourceBookingCreationDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingUpdateDto;
+import com.eventhub.exception.NotAuthorizedException;
+import com.eventhub.exception.NotAuthorizedException.*;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.mapper.ResourceBookingMapper;
 import com.eventhub.model.ResourceBooking;
 import com.eventhub.repository.ResourceBookingRepository;
@@ -96,11 +100,11 @@ public class ResourceBookingService {
     }
 
     public ResourceBookingDto getBookingById(Long id, Authentication connectedUser) {
-        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
+        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.BOOKING));
         if(isUserAuthorized(resourceBooking, connectedUser)) {
             return resourceBookingMapper.toDto(resourceBooking);
         } else {
-            throw new IllegalArgumentException("You are not authorized to view this booking");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.BOOKING, id);
         }
     }
 
@@ -109,7 +113,7 @@ public class ResourceBookingService {
         String organizerId = connectedUser.getName();
         ResourceBooking resourceBooking = resourceBookingMapper.toEntity(resourceBookingCreationDto);
         if(!resourceBooking.getEvent().getCreatedBy().equals(organizerId)){
-            throw new IllegalArgumentException("You are not authorized to create a booking to this event");
+            throw new NotAuthorizedException(Action.CREATE, ResourceType.BOOKING);
         }
         if (resourceBooking.getVenue() != null && !venueService.isVenueSuitableForEventType(resourceBooking.getVenue().getId(), resourceBooking.getEvent().getType())) {
             throw new IllegalArgumentException("Selected venue is not suitable for this event type");
@@ -135,18 +139,18 @@ public class ResourceBookingService {
 
     // TODO: Transactions
     public ResourceBookingDto updateBooking(Long id, ResourceBookingUpdateDto newBooking, Authentication connectedUser) {
-        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
+        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.BOOKING));
         if(isUserAuthorized(resourceBooking, connectedUser)) {
             ResourceBooking b = resourceBookingMapper.updateEntityFromDto(newBooking, resourceBooking);
             resourceBookingRepository.save(b);
             return resourceBookingMapper.toDto(b);
         } else {
-            throw new IllegalArgumentException("You are not authorized to update this booking");
+            throw new NotAuthorizedException(Action.UPDATE, ResourceType.BOOKING, id);
         }
     }
 
     public void cancelBooking(Long id, Authentication connectedUser) {
-        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
+        ResourceBooking resourceBooking = resourceBookingRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.BOOKING));
         if(isUserAuthorized(resourceBooking, connectedUser)) {
             resourceBooking.setCancelled(true);
             resourceBooking.setCancellationTime(java.time.LocalDateTime.now());
@@ -158,7 +162,7 @@ public class ResourceBookingService {
             String organizerEmail = jwt.getClaimAsString("email");
             emailService.sendBookingCancellation(resourceBooking, organizerEmail);
         } else {
-            throw new IllegalArgumentException("You are not authorized to cancel this booking");
+            throw new NotAuthorizedException(Action.CANCEL, ResourceType.BOOKING, id);
         }
     }
 
@@ -169,9 +173,9 @@ public class ResourceBookingService {
         String organizerEmail = jwt.getClaimAsString("email");
         String organizerId = connectedUser.getName();
 
-        ResourceBooking resourceBooking = resourceBookingRepository.findById(bookingId).orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+        ResourceBooking resourceBooking = resourceBookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(EntityType.BOOKING));
         if (!resourceBooking.getCreatedBy().equals(organizerId)) {
-            throw new IllegalArgumentException("You are not authorized to pay for this booking");
+            throw new NotAuthorizedException(Action.PAY, ResourceType.BOOKING, bookingId);
         }
         resourceBooking.setStatus(ResourceBooking.Status.CONFIRMED);
         resourceBookingRepository.save(resourceBooking);

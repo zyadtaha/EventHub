@@ -4,6 +4,10 @@ import com.eventhub.common.PageResponse;
 import com.eventhub.dto.eventregistration.RegistrationCreationDto;
 import com.eventhub.dto.eventregistration.RegistrationDto;
 import com.eventhub.dto.eventregistration.RegistrationUpdateDto;
+import com.eventhub.exception.NotAuthorizedException;
+import com.eventhub.exception.NotAuthorizedException.*;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.mapper.RegistrationMapper;
 import com.eventhub.model.Event;
 import com.eventhub.model.EventRegistration;
@@ -60,9 +64,9 @@ public class EventRegistrationService {
     }
 
     public PageResponse<RegistrationDto> getAllRegistrationsByEvent(int pageNumber, int pageSize, Long eventId, String organizerId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         if(!event.getCreatedBy().equals(organizerId)) {
-            throw new IllegalArgumentException("You are not authorized to view registrations for this event");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.REGISTRATION);
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<EventRegistration> registrations = registrationRepository.findByEventId(eventId, pageable);
@@ -102,9 +106,9 @@ public class EventRegistrationService {
     }
 
     public RegistrationDto getRegistrationById(Long id, String userId) {
-        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.REGISTRATION));
         if (!registration.getCreatedBy().equals(userId) && !registration.getOrganizerId().equals(userId)) {
-            throw new IllegalArgumentException("You are not authorized to view this registration");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.REGISTRATION, id);
         }
         return registrationMapper.toDto(registration);
     }
@@ -119,7 +123,7 @@ public class EventRegistrationService {
         EventRegistration registration = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeEmail);
         registrationRepository.save(registration);
 
-        Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         String paymentUrl = stripeService.createPaymentLink(
                 BigDecimal.valueOf(event.getRetailPrice()),
                 "USD",
@@ -133,44 +137,44 @@ public class EventRegistrationService {
     }
 
     public RegistrationDto updateRegistration(Long id, RegistrationUpdateDto registrationUpdateDto, String attendeeId) {
-        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.REGISTRATION));
         if (!registration.getCreatedBy().equals(attendeeId)) {
-            throw new IllegalArgumentException("You are not authorized to update this registration");
+            throw new NotAuthorizedException(Action.UPDATE, ResourceType.REGISTRATION, id);
         }
         registration = registrationMapper.updateEntityFromDto(registrationUpdateDto, registration);
         registrationRepository.save(registration);
 
-        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         emailService.sendAttendeeUpdate(registration.getAttendeeEmail(), event);
 
         return registrationMapper.toDto(registration);
     }
 
     public RegistrationDto cancelRegistration(Long id, String attendeeId) {
-        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+        EventRegistration registration = registrationRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.REGISTRATION));
         if (!registration.getCreatedBy().equals(attendeeId)) {
-            throw new IllegalArgumentException("You are not authorized to cancel this registration");
+            throw new NotAuthorizedException(Action.CANCEL, ResourceType.REGISTRATION, id);
         }
         registration.setCancelled(true);
         registration.setCancellationTime(java.time.LocalDateTime.now());
         registration.setStatus(EventRegistration.RegistrationStatus.CANCELLED);
         registrationRepository.save(registration);
 
-        Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         emailService.sendAttendeeCancellation(registration.getAttendeeEmail(), event);
         return registrationMapper.toDto(registration);
     }
 
     @Transactional
     public void confirmPayment(Long registrationId, String attendeeId) {
-        EventRegistration registration = registrationRepository.findById(registrationId).orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+        EventRegistration registration = registrationRepository.findById(registrationId).orElseThrow(() -> new NotFoundException(EntityType.REGISTRATION));
         if (!registration.getCreatedBy().equals(attendeeId)) {
-            throw new IllegalArgumentException("You are not authorized to pay for this registration");
+            throw new NotAuthorizedException(Action.PAY, ResourceType.REGISTRATION, registrationId);
         }
         registration.setStatus(EventRegistration.RegistrationStatus.CONFIRMED);
         registrationRepository.save(registration);
 
-        Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(registration.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         emailService.sendAttendeeInvitation(registration.getAttendeeEmail(), event);
     }
 }

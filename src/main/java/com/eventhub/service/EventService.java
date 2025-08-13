@@ -4,6 +4,10 @@ import com.eventhub.common.PageResponse;
 import com.eventhub.dto.event.EventCreationDto;
 import com.eventhub.dto.event.EventDto;
 import com.eventhub.dto.event.EventUpdateDto;
+import com.eventhub.exception.NotAuthorizedException;
+import com.eventhub.exception.NotAuthorizedException.*;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.mapper.EventMapper;
 import com.eventhub.model.Event;
 import com.eventhub.repository.EventRepository;
@@ -66,12 +70,12 @@ public class EventService {
     }
 
     public EventDto getEventById(Long id, Authentication connectedUser) {
-        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ATTENDEE")) ||
                 event.getCreatedBy().equals(connectedUser.getName())) {
             return eventMapper.toDto(event);
         } else {
-            throw new IllegalArgumentException("You are not authorized to view this event");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.EVENT, id);
         }
     }
 
@@ -82,9 +86,9 @@ public class EventService {
     }
 
     public EventDto updateEvent(Long id, EventUpdateDto eventDto, String organizerId) {
-        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         if (!event.getCreatedBy().equals(organizerId)) {
-            throw new IllegalArgumentException("You are not authorized to update this event");
+            throw new NotAuthorizedException(Action.UPDATE, ResourceType.EVENT, id);
         }
         event = eventMapper.updateFromDtoToEntity(eventDto, event);
         eventRepository.save(event);
@@ -92,9 +96,9 @@ public class EventService {
     }
 
     public void cancelEvent(Long id, String organizerId) {
-        Event event = eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         if (!event.getCreatedBy().equals(organizerId)) {
-            throw new IllegalArgumentException("You are not authorized to cancel this event");
+            throw new NotAuthorizedException(Action.CANCEL, ResourceType.EVENT, id);
         }
         event.setCancelled(true);
         event.setCancellationTime(java.time.LocalDateTime.now());
