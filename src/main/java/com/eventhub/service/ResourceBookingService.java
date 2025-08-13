@@ -26,6 +26,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.eventhub.constant.ExceptionConstant.NOT_SUITABLE_WITH_EVENT_TYPE;
+import static com.eventhub.constant.ServiceConstant.*;
+import static com.eventhub.constant.SortConstant.CREATED_AT;
+
 @Service
 public class ResourceBookingService {
     private final ResourceBookingRepository resourceBookingRepository;
@@ -43,7 +47,7 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getAllBookings(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<ResourceBooking> bookings = resourceBookingRepository.findAll(pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
@@ -62,7 +66,7 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getBookingsByOrganizerId(int pageNumber, int pageSize, String organizerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<ResourceBooking> bookings = resourceBookingRepository.findByCreatedBy(organizerId, pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
@@ -81,7 +85,7 @@ public class ResourceBookingService {
     }
 
     public PageResponse<ResourceBookingDto> getBookingsByProviderId(int pageNumber, int pageSize, String providerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<ResourceBooking> bookings = resourceBookingRepository.findByProviderId(providerId, pageable);
         List<ResourceBookingDto> bookingDtos = bookings
                 .stream()
@@ -116,7 +120,7 @@ public class ResourceBookingService {
             throw new NotAuthorizedException(Action.CREATE, ResourceType.BOOKING);
         }
         if (resourceBooking.getVenue() != null && !venueService.isVenueSuitableForEventType(resourceBooking.getVenue().getId(), resourceBooking.getEvent().getType())) {
-            throw new IllegalArgumentException("Selected venue is not suitable for this event type");
+            throw new IllegalStateException(NOT_SUITABLE_WITH_EVENT_TYPE);
         }
         resourceBookingRepository.save(resourceBooking);
 
@@ -124,15 +128,15 @@ public class ResourceBookingService {
 
         String paymentUrl = stripeService.createPaymentLink(
                 BigDecimal.valueOf(resourceBooking.getTotalPrice()),
-                "USD",
-                "Booking for " + bookableName,
+                PAYMENT_CURRENCY,
+                String.format(BOOKING_FOR, bookableName),
                 resourceBooking.getId(),
                 false
         );
 
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
-        String organizerEmail = jwt.getClaimAsString("email");
+        String organizerEmail = jwt.getClaimAsString(EMAIL);
         emailService.sendBookingPaymentRequest(organizerEmail, bookableName, paymentUrl);
         return resourceBookingMapper.toDto(resourceBooking);
     }
@@ -159,7 +163,7 @@ public class ResourceBookingService {
 
             JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
             Jwt jwt = jwtToken.getToken();
-            String organizerEmail = jwt.getClaimAsString("email");
+            String organizerEmail = jwt.getClaimAsString(EMAIL);
             emailService.sendBookingCancellation(resourceBooking, organizerEmail);
         } else {
             throw new NotAuthorizedException(Action.CANCEL, ResourceType.BOOKING, id);
@@ -170,7 +174,7 @@ public class ResourceBookingService {
     public void confirmPayment(Long bookingId, Authentication connectedUser) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
-        String organizerEmail = jwt.getClaimAsString("email");
+        String organizerEmail = jwt.getClaimAsString(EMAIL);
         String organizerId = connectedUser.getName();
 
         ResourceBooking resourceBooking = resourceBookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(EntityType.BOOKING));

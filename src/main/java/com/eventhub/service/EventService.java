@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.eventhub.constant.SortConstant.START_DATE_TIME;
+
 @Service
 public class EventService {
     EventRepository eventRepository;
@@ -32,7 +34,7 @@ public class EventService {
     }
 
     public PageResponse<EventDto> getAllEvents(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDateTime").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(START_DATE_TIME).descending());
         Page<Event> events = eventRepository.findAll(pageable);
         List<EventDto> eventDtos = events
                 .stream()
@@ -51,7 +53,7 @@ public class EventService {
     }
 
     public PageResponse<EventDto> getAllEventsByOrganizer(int pageNumber, int pageSize, String organizerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("startDateTime").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(START_DATE_TIME).descending());
         Page<Event> events = eventRepository.findByCreatedBy(organizerId, pageable);
         List<EventDto> eventDtos = events
                 .stream()

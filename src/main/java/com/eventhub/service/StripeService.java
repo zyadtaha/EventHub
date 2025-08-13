@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import static com.eventhub.constant.ServiceConstant.*;
 
 @Service
 public class StripeService {
@@ -22,13 +25,13 @@ public class StripeService {
         Stripe.apiKey = stripeApiKey;
 
         BigDecimal amountInCents = amount
-                .multiply(new BigDecimal("100"))
-                .setScale(2, BigDecimal.ROUND_HALF_UP);
+                .multiply(new BigDecimal(HUNDERED))
+                .setScale(2, RoundingMode.HALF_UP);
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:8080/payments/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl("http://localhost:8080/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
+                .setSuccessUrl(SUCCESS_URL)
+                .setCancelUrl(CANCEL_URL)
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setPriceData(
@@ -45,8 +48,8 @@ public class StripeService {
                                 .setQuantity(1L)
                                 .build()
                 )
-                .putMetadata("reservation_id", reservationId.toString())
-                .putMetadata("is_registration", String.valueOf(isEventRegistration))
+                .putMetadata(RESERVATION_ID, reservationId.toString())
+                .putMetadata(IS_EVENT_REGISTRATION, String.valueOf(isEventRegistration))
                 .build();
 
         Session session = Session.create(params);

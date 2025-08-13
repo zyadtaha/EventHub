@@ -6,6 +6,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import static com.eventhub.constant.EmailConstant.*;
+
 @Service
 public class EmailService {
     private final JavaMailSender mailSender;
@@ -23,57 +25,53 @@ public class EmailService {
     }
 
     public void sendBookingConfirmation(ResourceBooking resourceBooking, String organizerEmail) {
-        String subject = "Booking Confirmation";
         String body;
         if(resourceBooking.getVenue() != null){
-            body = "Booking for Venue: " + resourceBooking.getVenue().getName() + " is confirmed";
-            sendEmail(resourceBooking.getVenue().getProviderEmail(), subject, body);
+            body = String.format(VENUE_BOOKING_CONFIRMATION_BODY_TEMPLATE, resourceBooking.getVenue().getName());
+            sendEmail(resourceBooking.getVenue().getProviderEmail(), BOOKING_CONFIRMATION_SUBJECT, body);
         } else {
-            body = "Booking for Offering: " + resourceBooking.getOffering().getName() + " is confirmed";
-            sendEmail(resourceBooking.getOffering().getProviderEmail(), subject, body);
+            body = String.format(OFFERING_BOOKING_CONFIRMATION_BODY_TEMPLATE, resourceBooking.getOffering().getName());
+            sendEmail(resourceBooking.getOffering().getProviderEmail(), BOOKING_CONFIRMATION_SUBJECT, body);
         }
-        sendEmail(organizerEmail, subject, body);
+        sendEmail(organizerEmail, BOOKING_CONFIRMATION_SUBJECT, body);
     }
 
     public void sendBookingCancellation(ResourceBooking resourceBooking, String organizerEmail) {
-        String subject = "Booking Cancellation";
         String body;
         if(resourceBooking.getVenue() != null){
-            body = "Booking for Venue: " + resourceBooking.getVenue().getName() + " has been cancelled.";
-            sendEmail(resourceBooking.getVenue().getProviderEmail(), subject, body);
+            body = String.format(VENUE_BOOKING_CANCELLATION_BODY_TEMPLATE, resourceBooking.getVenue().getName());
+            sendEmail(resourceBooking.getVenue().getProviderEmail(), BOOKING_CANCELLATION_SUBJECT, body);
         } else {
-            body = "Booking for Offering: " + resourceBooking.getOffering().getName() + " has been cancelled.";
-            sendEmail(resourceBooking.getOffering().getProviderEmail(), subject, body);
+            body = String.format(OFFERING_BOOKING_CANCELLATION_BODY_TEMPLATE, resourceBooking.getOffering().getName());
+            sendEmail(resourceBooking.getOffering().getProviderEmail(), BOOKING_CANCELLATION_SUBJECT, body);
         }
-        sendEmail(organizerEmail, subject, body);
+        sendEmail(organizerEmail, BOOKING_CANCELLATION_SUBJECT, body);
     }
 
     public void sendAttendeeInvitation(String attendeeEmail, Event event) {
-        String subject = "Event Invitation";
         String body = String.format(
-                "You're invited to %s\nStart Time: %s\nEnd Time: %s\n",
+                EVENT_INVITATION_BODY_TEMPLATE,
                 event.getName(),
                 event.getStartDateTime(),
                 event.getEndDateTime()
         );
-        sendEmail(attendeeEmail, subject, body);
+        sendEmail(attendeeEmail, EVENT_INVITATION_SUBJECT, body);
     }
 
     public void sendAttendeeUpdate(String attendeeEmail, Event event) {
-        String subject = "Event Updates";
         String body = String.format(
-                "Update for %s:\nNew Details:\nStart Time: %s\nEnd Time: %s\n",
+                EVENT_UPDATE_BODY_TEMPLATE,
                 event.getName(),
                 event.getStartDateTime(),
                 event.getEndDateTime()
         );
-        sendEmail(attendeeEmail, subject, body);
+        sendEmail(attendeeEmail, EVENT_UPDATE_SUBJECT, body);
     }
 
     public void sendAttendeeReminder(String attendeeEmail, Event event) {
-        String subject = "Reminder: " + event.getName() + " is coming up!";
+        String subject = String.format(EVENT_REMINDER_SUBJECT, event.getName());
         String body = String.format(
-                "This is a reminder for %s\nStarts in 24 hours!\nStart Time: %s\nEnd Time: %s\n",
+                EVENT_REMINDER_BODY_TEMPLATE,
                 event.getName(),
                 event.getStartDateTime(),
                 event.getEndDateTime()
@@ -82,28 +80,25 @@ public class EmailService {
     }
 
     public void sendAttendeeCancellation(String attendeeEmail, Event event) {
-        String subject = "Event Registration Cancellation";
-        String body = String.format("Registration for %s has been cancelled.", event.getName());
-        sendEmail(attendeeEmail, subject, body);
+        String body = String.format(REGISTRATION_CANCELLATION_BODY_TEMPLATE, event.getName());
+        sendEmail(attendeeEmail, REGISTRATION_CANCELLATION_SUBJECT, body);
     }
 
     public void sendRegistrationPaymentRequest(String attendeeEmail, Event event, String paymentUrl) {
-        String subject = "Payment Request for Event Registration";
         String body = String.format(
-                "Thank you for registering for %s.\nPlease complete your payment using the following link: %s\n\n",
+                REGISTRATION_PAYMENT_REQUEST_BODY_TEMPLATE,
                 event.getName(),
                 paymentUrl
         );
-        sendEmail(attendeeEmail, subject, body);
+        sendEmail(attendeeEmail, REGISTRATION_PAYMENT_REQUEST_SUBJECT, body);
     }
 
     public void sendBookingPaymentRequest(String organizerEmail, String name, String paymentUrl) {
-        String subject = "Payment Request for Booking";
         String body = String.format(
-                "Thank you for booking for %s.\nPlease complete your payment using the following link: %s\n\n",
+                BOOKING_PAYMENT_REQUEST_BODY_TEMPLATE,
                 name,
                 paymentUrl
         );
-        sendEmail(organizerEmail, subject, body);
+        sendEmail(organizerEmail, BOOKING_PAYMENT_REQUEST_SUBJECT, body);
     }
 }
