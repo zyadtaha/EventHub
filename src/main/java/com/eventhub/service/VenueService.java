@@ -2,6 +2,10 @@ package com.eventhub.service;
 
 import com.eventhub.common.PageResponse;
 import com.eventhub.dto.VenueDto;
+import com.eventhub.exception.NotAuthorizedException;
+import com.eventhub.exception.NotAuthorizedException.*;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.mapper.VenueMapper;
 import com.eventhub.model.Event.EventType;
 import com.eventhub.model.Venue;
@@ -68,12 +72,12 @@ public class VenueService {
     }
 
     public VenueDto getVenueById(Long id, Authentication connectedUser) {
-        Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        Venue venue = venueRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.VENUE));
         if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
                 venue.getCreatedBy().equals(connectedUser.getName())) {
             return venueMapper.toDto(venue);
         } else {
-            throw new IllegalArgumentException("You are not authorized to view this venue");
+            throw new NotAuthorizedException(Action.VIEW, ResourceType.VENUE, id);
         }
     }
 
@@ -87,9 +91,9 @@ public class VenueService {
     }
 
     public VenueDto updateVenue(Long id, VenueDto newVenueDto, String providerId) {
-        Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        Venue venue = venueRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.VENUE));
         if(!venue.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to update this venue");
+            throw new NotAuthorizedException(Action.UPDATE, ResourceType.VENUE, id);
         }
         venue.setName(newVenueDto.getName());
         venue.setLocation(newVenueDto.getLocation());
@@ -103,9 +107,9 @@ public class VenueService {
     }
 
     public void deleteVenue(Long id, String providerId) {
-        Venue venue = venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        Venue venue = venueRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.VENUE));
         if(!venue.getCreatedBy().equals(providerId)){
-            throw new IllegalArgumentException("You are not authorized to delete this venue");
+            throw new NotAuthorizedException(Action.DELETE, ResourceType.VENUE, id);
         }
         venueRepository.delete(venue);
     }
@@ -118,7 +122,7 @@ public class VenueService {
     );
 
     public boolean isVenueSuitableForEventType(Long venueId, EventType eventType) {
-        Venue venue = venueRepository.findById(venueId).orElseThrow(() -> new IllegalArgumentException("Venue not found"));
+        Venue venue = venueRepository.findById(venueId).orElseThrow(() -> new NotFoundException(EntityType.VENUE));
         return eligibilityMap.getOrDefault(venue.getType(), Set.of()).contains(eventType);
     }
 
