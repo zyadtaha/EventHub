@@ -28,6 +28,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.eventhub.constant.ServiceConstant.*;
+import static com.eventhub.constant.SortConstant.CREATED_AT;
+
 @Service
 public class EventRegistrationService {
     private final EventRegistrationRepository registrationRepository;
@@ -45,7 +48,7 @@ public class EventRegistrationService {
     }
 
     public PageResponse<RegistrationDto> getAllRegistrations(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<EventRegistration> registrations = registrationRepository.findAll(pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
@@ -68,7 +71,7 @@ public class EventRegistrationService {
         if(!event.getCreatedBy().equals(organizerId)) {
             throw new NotAuthorizedException(Action.VIEW, ResourceType.REGISTRATION);
         }
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<EventRegistration> registrations = registrationRepository.findByEventId(eventId, pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
@@ -87,7 +90,7 @@ public class EventRegistrationService {
     }
 
     public PageResponse<RegistrationDto> getAllRegistrationsByAttendee(int pageNumber, int pageSize, String attendeeId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(CREATED_AT).descending());
         Page<EventRegistration> registrations = registrationRepository.findByCreatedBy(attendeeId, pageable);
         List<RegistrationDto> registrationDtos = registrations
                 .stream()
@@ -117,8 +120,8 @@ public class EventRegistrationService {
     public RegistrationDto createRegistration(RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
-        String attendeeName = jwt.getClaimAsString("preferred_username");
-        String attendeeEmail = jwt.getClaimAsString("email");
+        String attendeeName = jwt.getClaimAsString(PREFERRED_USERNAME); // TODO: should be deprecated (createdBy field)
+        String attendeeEmail = jwt.getClaimAsString(EMAIL);
 
         EventRegistration registration = registrationMapper.toEntity(registrationCreationDto, attendeeName, attendeeEmail);
         registrationRepository.save(registration);
@@ -126,8 +129,8 @@ public class EventRegistrationService {
         Event event = eventRepository.findById(registrationCreationDto.getEventId()).orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         String paymentUrl = stripeService.createPaymentLink(
                 BigDecimal.valueOf(event.getRetailPrice()),
-                "USD",
-                "Registration for: " + event.getName(),
+                PAYMENT_CURRENCY,
+                String.format(REGISTRATION_FOR, event.getName()),
                 registration.getId(),
                 true
         );

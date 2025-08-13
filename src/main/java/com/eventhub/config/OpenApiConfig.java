@@ -6,24 +6,25 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.servers.Server;
+
+import static com.eventhub.constant.OpenApiConstant.*;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "EventHub API",
-                version = "1.0.0",
-                description = "API for the EventHub system."
+                title = TITLE,
+                version = VERSION,
+                description = DESCRIPTION
         ),
         security = {
-                @SecurityRequirement(name = "BearerAuth")
+                @SecurityRequirement(name = SECURITY_SCHEME_NAME)
         }
 )
 @SecurityScheme(
-        name = "BearerAuth",
+        name = SECURITY_SCHEME_NAME,
         type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        description = "Use the JWT token obtained from the authentication server to access protected resources.",
-        bearerFormat = "JWT",
+        scheme = SECURITY_SCHEME_SCHEME,
+        description = SECURITY_SCHEME_DESCRIPTION,
+        bearerFormat = BEARER_FORMAT,
         in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfig {

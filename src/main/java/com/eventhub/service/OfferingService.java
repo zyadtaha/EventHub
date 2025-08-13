@@ -22,6 +22,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.eventhub.constant.ExceptionConstant.*;
+import static com.eventhub.constant.ServiceConstant.EMAIL;
+import static com.eventhub.constant.ServiceConstant.ROLE_ORGANIZER;
+import static com.eventhub.constant.SortConstant.PRICE;
+
 @Service
 public class OfferingService {
     private final OfferingRepository offeringRepository;
@@ -33,7 +38,7 @@ public class OfferingService {
     }
 
     public PageResponse<OfferingDto> getAllOfferings(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("price").ascending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(PRICE).ascending());
         Page<Offering> offerings = offeringRepository.findAll(pageable);
         List<OfferingDto> offeringDtos = offerings
                 .stream()
@@ -52,7 +57,7 @@ public class OfferingService {
     }
 
     public PageResponse<OfferingDto> getAllOfferingsByProvider(int pageNumber, int pageSize, String providerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("price").ascending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(PRICE).ascending());
         Page<Offering> offerings = offeringRepository.findByCreatedBy(providerId, pageable);
         List<OfferingDto> offeringDtos = offerings
                 .stream()
@@ -72,7 +77,7 @@ public class OfferingService {
 
     public OfferingDto getOfferingById(Long id, Authentication connectedUser) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
-        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
+        if(connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals(ROLE_ORGANIZER)) ||
                 offering.getCreatedBy().equals(connectedUser.getName())) {
             return offeringMapper.toDto(offering);
         } else {
@@ -83,7 +88,7 @@ public class OfferingService {
     public OfferingDto createOffering(OfferingDto offeringDto, Authentication connectedUser) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
-        String providerEmail = jwt.getClaimAsString("email");
+        String providerEmail = jwt.getClaimAsString(EMAIL);
         Offering offering = offeringMapper.toEntity(offeringDto, providerEmail);
         Offering o = offeringRepository.save(offering);
         return offeringMapper.toDto(o);
@@ -120,7 +125,7 @@ public class OfferingService {
     public OfferingDto addOption(Long id, Offering.Option option, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new NotAuthorizedException("You are not authorized to add an option to this offering");
+            throw new NotAuthorizedException(NOT_AUTHORIZED_TO_ADD_AVAILABILITY_SLOT_MESSAGE);
         }
         offering.addOption(option);
         offeringRepository.save(offering);
@@ -135,7 +140,7 @@ public class OfferingService {
     public OfferingDto addAvailabilitySlot(Long id, LocalDateTime startTime, LocalDateTime endTime, String providerId) {
         Offering offering = offeringRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
         if(!offering.getCreatedBy().equals(providerId)){
-            throw new NotAuthorizedException("You are not authorized to add an availability slot to this offering");
+            throw new NotAuthorizedException(NOT_AUTHORIZED_TO_ADD_OPTION_MESSAGE);
         }
         offering.addAvailabilitySlot(new Offering.AvailabilitySlot(startTime, endTime));
         offeringRepository.save(offering);

@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.eventhub.constant.ServiceConstant.*;
+import static com.eventhub.constant.SortConstant.PRICE_PER_HOUR;
+
 @Service
 public class VenueService {
     private final VenueRepository venueRepository;
@@ -34,7 +37,7 @@ public class VenueService {
     }
 
     public PageResponse<VenueDto> getAllVenues(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(PRICE_PER_HOUR).ascending());
         Page<Venue> venues = venueRepository.findAll(pageable);
         List<VenueDto> venueDtos = venues
                 .stream()
@@ -53,7 +56,7 @@ public class VenueService {
     }
 
     public PageResponse<VenueDto> getAllVenuesByProvider(int pageNumber, int pageSize, String providerId) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(PRICE_PER_HOUR).ascending());
         Page<Venue> venues = venueRepository.findByCreatedBy(providerId, pageable);
         List<VenueDto> venueDtos = venues
                 .stream()
@@ -73,7 +76,7 @@ public class VenueService {
 
     public VenueDto getVenueById(Long id, Authentication connectedUser) {
         Venue venue = venueRepository.findById(id).orElseThrow(() -> new NotFoundException(EntityType.VENUE));
-        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ORGANIZER")) ||
+        if (connectedUser.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals(ROLE_ORGANIZER)) ||
                 venue.getCreatedBy().equals(connectedUser.getName())) {
             return venueMapper.toDto(venue);
         } else {
@@ -84,7 +87,7 @@ public class VenueService {
     public VenueDto createVenue(VenueDto venueDto, Authentication connectedUser) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) connectedUser;
         Jwt jwt = jwtToken.getToken();
-        String providerEmail = jwt.getClaimAsString("email");
+        String providerEmail = jwt.getClaimAsString(EMAIL);
         Venue venue = venueMapper.toEntity(venueDto, providerEmail);
         Venue v = venueRepository.save(venue);
         return venueMapper.toDto(v);
@@ -127,7 +130,7 @@ public class VenueService {
     }
 
     public PageResponse<VenueDto> findAllEligibleVenues(int pageNumber, int pageSize, EventType eventType) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("pricePerHour").ascending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(PRICE_PER_HOUR).ascending());
         Page<Venue> venues = venueRepository.findAll(pageable);
         List<VenueDto> venueDtos = venues
                 .stream()

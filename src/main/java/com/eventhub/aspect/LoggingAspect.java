@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+import static com.eventhub.constant.AspectConstant.*;
+
 @Aspect
 @Component
 @Slf4j
@@ -16,9 +18,9 @@ public class LoggingAspect {
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
-        log.info("Method: {} with Arguments: {} will execute.", methodName, Arrays.toString(args));
+        log.info(BEFORE_EXECUTING_MESSAGE, methodName, Arrays.toString(args));
         Object result = joinPoint.proceed();
-        log.info("Method: {} executed with Result: {}.", methodName, result);
+        log.info(AFTER_EXECUTING_MESSAGE, methodName, result);
         return result;
     }
 }
