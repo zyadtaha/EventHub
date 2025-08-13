@@ -3,6 +3,8 @@ package com.eventhub.mapper;
 import com.eventhub.dto.resourcebooking.ResourceBookingCreationDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingDto;
 import com.eventhub.dto.resourcebooking.ResourceBookingUpdateDto;
+import com.eventhub.exception.NotFoundException;
+import com.eventhub.exception.NotFoundException.*;
 import com.eventhub.model.ResourceBooking;
 import com.eventhub.model.Event;
 import com.eventhub.model.Offering;
@@ -37,14 +39,14 @@ public class ResourceBookingMapper {
 
     public ResourceBooking toEntity(ResourceBookingCreationDto resourceBookingCreationDto) {
         Event event = eventRepository.findById(resourceBookingCreationDto.getEventId())
-                .orElseThrow(() -> new IllegalArgumentException("Event not found with id: " + resourceBookingCreationDto.getEventId()));
+                .orElseThrow(() -> new NotFoundException(EntityType.EVENT));
         ResourceBooking resourceBooking = new ResourceBooking();
         resourceBooking.setEvent(event);
         if(resourceBookingCreationDto.getVenueId() == null) {
             resourceBooking.setVenue(null);
         } else {
             Venue venue = venueRepository.findById(resourceBookingCreationDto.getVenueId())
-                    .orElseThrow(() -> new IllegalArgumentException("Venue not found with id: " + resourceBookingCreationDto.getVenueId()));
+                    .orElseThrow(() -> new NotFoundException(EntityType.VENUE));
             resourceBooking.setVenue(venue);
             resourceBooking.setProviderId(venue.getCreatedBy());
         }
@@ -52,7 +54,7 @@ public class ResourceBookingMapper {
             resourceBooking.setOffering(null);
         } else {
             Offering offering = offeringRepository.findById(resourceBookingCreationDto.getOfferingId())
-                    .orElseThrow(() -> new IllegalArgumentException("Offering not found with id: " + resourceBookingCreationDto.getOfferingId()));
+                    .orElseThrow(() -> new NotFoundException(EntityType.OFFERING));
             resourceBooking.setOffering(offering);
             resourceBooking.setProviderId(offering.getCreatedBy());
         }
