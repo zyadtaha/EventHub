@@ -33,7 +33,7 @@ public class ResourceBookingController {
     }
 
     @GetMapping("/orgnaizer")
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get bookings for the current organizer", description = "Retrieve bookings filtered by the authenticated organizer.")
     public PageResponse<ResourceBookingDto> getBookingsByOrganizerId(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -44,7 +44,7 @@ public class ResourceBookingController {
     }
 
     @GetMapping("/provider")
-    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER') or hasRole('ADMIN')")
     @Operation(summary = "Get bookings for the current provider", description = "Retrieve bookings filtered by the authenticated provider.")
     public PageResponse<ResourceBookingDto> getBookingsByProviderId(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -55,28 +55,28 @@ public class ResourceBookingController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER') or hasRole('ADMIN')")
     @Operation(summary = "Get booking by ID", description = "Retrieve a specific resource booking by its ID.")
     public ResourceBookingDto getBookingById(@PathVariable Long id, Authentication connectedUser) {
         return resourceBookingService.getBookingById(id, connectedUser);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Create a new resource booking", description = "Create a new resource booking for an event.")
     public ResourceBookingDto createBooking(@RequestBody ResourceBookingCreationDto resourceBookingCreationDto, Authentication connectedUser) throws StripeException {
         return resourceBookingService.createBooking(resourceBookingCreationDto, connectedUser);
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER') or hasRole('ADMIN')")
     @Operation(summary = "Cancel a resource booking", description = "Cancel an existing resource booking.")
     public void cancelBooking(@PathVariable Long id, Authentication connectedUser) {
         resourceBookingService.cancelBooking(id, connectedUser);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('VENUE_PROVIDER') or hasRole('OFFERING_PROVIDER') or hasRole('ADMIN')")
     @Operation(summary = "Update an existing resource booking", description = "Update the details of an existing resource booking.")
     public ResourceBookingDto updateBooking(@PathVariable Long id, @RequestBody ResourceBookingUpdateDto resourceBookingUpdateDto, Authentication connectedUser) {
         return resourceBookingService.updateBooking(id, resourceBookingUpdateDto, connectedUser);

@@ -15,7 +15,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/venues")
-@PreAuthorize("hasRole('VENUE_PROVIDER')")
+@PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ADMIN')")
 @Tag(name = "Venue", description = "Manage venues for events")
 public class VenueController {
     private final VenueService venueService;
@@ -25,7 +25,7 @@ public class VenueController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get all venues", description = "Retrieve a list of all available venues.")
     public PageResponse<VenueDto> getAllVenues(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -45,14 +45,14 @@ public class VenueController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get a venue by ID", description = "Retrieve the details of a specific venue by its ID.")
     public VenueDto getVenueById(@PathVariable Long id, Authentication connectedUser){
         return venueService.getVenueById(id, connectedUser);
     }
 
     @GetMapping("/eligible")
-    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('VENUE_PROVIDER') or hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get eligible venues for an event type", description = "Retrieve a list of venues that are eligible for a specific event type.")
     public PageResponse<VenueDto> getAllEligibleVenues(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,

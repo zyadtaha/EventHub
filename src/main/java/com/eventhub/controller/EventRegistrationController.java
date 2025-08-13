@@ -34,7 +34,7 @@ public class EventRegistrationController {
     }
 
     @GetMapping(params = "eventId")
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get the registrations of a specific event", description = "Retrieve a list of all registrations of an event organized by the authenticated organizer.")
     public PageResponse<RegistrationDto> getAllRegistrationsByEvent(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -45,7 +45,7 @@ public class EventRegistrationController {
     }
 
     @GetMapping("/attendee")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Get the registrations made by the current attendee", description = "Retrieve a list of all registrations made by the authenticated attendee.")
     public PageResponse<RegistrationDto> getAllRegistrationsByAttendee(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -56,28 +56,28 @@ public class EventRegistrationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Get registration by ID", description = "Retrieve a specific event registration by its ID.")
     public RegistrationDto getRegistrationById(@PathVariable Long id, Authentication connectedUser) {
         return registrationService.getRegistrationById(id, connectedUser.getName());
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Create a new event registration", description = "Create a new registration for an event.")
     public RegistrationDto createRegistration(@RequestBody RegistrationCreationDto registrationCreationDto, Authentication connectedUser) throws StripeException {
         return registrationService.createRegistration(registrationCreationDto, connectedUser);
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Cancel an event registration", description = "Cancel an existing event registration.")
     public RegistrationDto cancelRegistration(@PathVariable Long id, Authentication connectedUser) {
         return registrationService.cancelRegistration(id, connectedUser.getName());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Update an event registration", description = "Update an existing event registration.")
     public RegistrationDto updateRegistration(
             @PathVariable Long id,

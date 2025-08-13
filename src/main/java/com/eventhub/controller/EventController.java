@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/events")
-@PreAuthorize("hasRole('ORGANIZER')")
+@PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
 @Tag(name = "Event", description = "Managing events")
 public class EventController {
     private final EventService eventService;
@@ -23,7 +23,7 @@ public class EventController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Get all events", description = "Retrieve a list of all available events")
     public PageResponse<EventDto> getAllEvents(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -43,7 +43,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ATTENDEE')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ATTENDEE') or hasRole('ADMIN')")
     @Operation(summary = "Get an event by ID", description = "Retrieve the details of a specific event by its ID")
     public EventDto getEventById(@PathVariable Long id, Authentication connectedUser){
         return eventService.getEventById(id, connectedUser);

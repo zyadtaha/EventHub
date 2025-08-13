@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/offerings")
-@PreAuthorize("hasRole('OFFERING_PROVIDER')")
+@PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ADMIN')")
 @Tag(name = "Offering", description = "Manage offerings for events")
 public class OfferingController {
     private final OfferingService offeringService;
@@ -24,7 +24,7 @@ public class OfferingController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get all offerings", description = "Retrieve a list of all available offerings.")
     public PageResponse<OfferingDto> getAllOfferings(
             @RequestParam(defaultValue = "0", required = false) int pageNumber,
@@ -44,7 +44,7 @@ public class OfferingController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get an offering by ID", description = "Retrieve the details of a specific offering by its ID.")
     public OfferingDto getOfferingById(@PathVariable Long id, Authentication connectedUser) {
         return offeringService.getOfferingById(id, connectedUser);
@@ -69,7 +69,7 @@ public class OfferingController {
     }
 
     @GetMapping("/{id}/options")
-    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get the options of a specific offering", description = "Retrieve a list of all options available for a specific offering.")
     public List<Offering.Option> getAllOptions(@PathVariable Long id) {
         return offeringService.getAllOptions(id);
@@ -85,7 +85,7 @@ public class OfferingController {
     }
 
     @GetMapping("/{id}/availability")
-    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('OFFERING_PROVIDER') or hasRole('ORGANIZER') or hasRole('ADMIN')")
     @Operation(summary = "Get the availability slots of a specific offering", description = "Retrieve a list of all availability slots for a specific offering.")
     public List<Offering.AvailabilitySlot> getAllAvailabilitySlots(@PathVariable Long id) {
         return offeringService.getAllAvailabilitySlot(id);
